@@ -164,7 +164,9 @@ USE_I18N = True
 USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+AVATAR_URL = '/avatars/'  # Custom URL prefix
+AVATAR_ROOT = BASE_DIR / 'avatars'  # Where files are stored
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
