@@ -31,6 +31,7 @@ class TutorialStep(models.Model):
         ('css', 'CSS'),
         ('js', 'JavaScript'),
         ('django', 'Django Template'),
+        ('html+css', 'HTML + CSS'),
     )
     
     tutorial = models.ForeignKey(Tutorial, on_delete=models.CASCADE, related_name="steps")
@@ -40,6 +41,8 @@ class TutorialStep(models.Model):
     file_type = models.CharField(max_length=20, choices=FILE_TYPE_CHOICES, default='python')
     initial_code = models.TextField(blank=True, help_text="Starting code the user will see")
     solution_code = models.TextField(help_text="Complete solution code")
+    trivia = models.TextField(blank=True, null=True, help_text="Trivia shown after completing this step"
+    )
     expected_elements = models.TextField(
         blank=True, 
         help_text="JSON array of strings or patterns that should be in user's code"
