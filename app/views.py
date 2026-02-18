@@ -90,8 +90,12 @@ class CheckCodeView(APIView):
         step_index = request.data.get('stepIndex')
         user_code = request.data.get('code')
 
-        tutorial = Tutorial.objects.get(id=tutorial_id)
-        step = TutorialStep.objects.get(tutorial=tutorial, order=step_index)
+        try:
+            tutorial = Tutorial.objects.get(id=tutorial_id)
+            step = TutorialStep.objects.get(tutorial=tutorial, order=step_index)
+        except ObjectDoesNotExist:
+            return Response({'error': 'Tutorial or step not found'}, status=status.HTTP_404_NOT_FOUND)
+
         expected_elements = step.get_expected_elements()
 
         # Ensure enrollment exists
@@ -161,6 +165,8 @@ class CheckCodeView(APIView):
         return Response({'success': True, 'output': 'Code is correct!'})
 
 class TutorialCompleteView(APIView):
+    permission_classes = [IsAuthenticated]
+
     def post(self, request, tutorial_id):
         try:
             tutorial = Tutorial.objects.get(id=tutorial_id)
@@ -176,9 +182,9 @@ class ResetProgressView(APIView):
 
     def post(self, request):
         user = request.user
-        # Delete all tutorial enrollments and submissions
-        UserTutorialEnrollment.objects.filter(user=user).delete()
+        # Delete submissions first (FK to enrollment), then enrollments
         UserStepSubmission.objects.filter(enrollment__user=user).delete()
+        UserTutorialEnrollment.objects.filter(user=user).delete()
         # Reset XP
         user.profile.total_xp = 0
         user.profile.save()
