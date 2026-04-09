@@ -1,0 +1,283 @@
+<!-- dashboard/templates/dashboard/base.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}DjangoQuest{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* ── Reset & Base ─────────────────────────────────────────── */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg:        #0f1117;
+            --surface:   #1a1d27;
+            --surface-2: #242834;
+            --border:    #2e3345;
+            --text:      #e2e4ed;
+            --text-dim:  #8b8fa3;
+            --accent:    #6c5ce7;
+            --accent-hover: #7c6df7;
+            --accent-soft: rgba(108, 92, 231, .12);
+            --success:   #00cec9;
+            --danger:    #ff6b6b;
+            --warning:   #feca57;
+            --radius:    10px;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        a { color: var(--accent); text-decoration: none; }
+        a:hover { color: var(--accent-hover); text-decoration: underline; }
+
+        /* ── Navbar ────────────────────────────────────────────── */
+        .navbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 2rem;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+        }
+        .navbar-brand {
+            font-weight: 800;
+            font-size: 1.2rem;
+            color: var(--accent);
+            letter-spacing: -0.5px;
+        }
+        .navbar-brand span { color: var(--text); }
+        .navbar-links { display: flex; gap: 1.2rem; align-items: center; }
+        .navbar-links a {
+            color: var(--text-dim);
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: color .2s;
+        }
+        .navbar-links a:hover { color: var(--text); text-decoration: none; }
+
+        /* ── Layout ────────────────────────────────────────────── */
+        .container {
+            max-width: 520px;
+            margin: 3rem auto;
+            padding: 0 1.5rem;
+        }
+        .container-wide {
+            max-width: 900px;
+            margin: 2.5rem auto;
+            padding: 0 1.5rem;
+        }
+
+        /* ── Card ──────────────────────────────────────────────── */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 2rem;
+        }
+        .card h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: .25rem;
+        }
+        .card .subtitle {
+            color: var(--text-dim);
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+        }
+
+        /* ── Forms ─────────────────────────────────────────────── */
+        .form-group { margin-bottom: 1.25rem; }
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            font-size: 0.85rem;
+            margin-bottom: .35rem;
+            color: var(--text);
+        }
+        .form-group .helptext {
+            display: block;
+            font-size: 0.78rem;
+            color: var(--text-dim);
+            margin-bottom: .35rem;
+        }
+        .form-group input[type="text"],
+        .form-group input[type="email"],
+        .form-group input[type="password"] {
+            width: 100%;
+            padding: .65rem .85rem;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-size: 0.9rem;
+            font-family: inherit;
+            transition: border-color .2s, box-shadow .2s;
+        }
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-soft);
+        }
+
+        /* ── Buttons ───────────────────────────────────────────── */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: .65rem 1.4rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: .875rem;
+            font-family: inherit;
+            cursor: pointer;
+            border: none;
+            transition: background .2s, transform .1s;
+        }
+        .btn:active { transform: scale(.97); }
+        .btn-primary {
+            background: var(--accent);
+            color: #fff;
+            width: 100%;
+        }
+        .btn-primary:hover { background: var(--accent-hover); text-decoration: none; color: #fff; }
+        .btn-sm { padding: .4rem .9rem; font-size: .8rem; }
+        .btn-success { background: var(--success); color: var(--bg); }
+        .btn-success:hover { opacity: .9; text-decoration: none; color: var(--bg); }
+        .btn-danger { background: var(--danger); color: #fff; }
+        .btn-danger:hover { opacity: .9; text-decoration: none; color: #fff; }
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-dim);
+        }
+        .btn-outline:hover { border-color: var(--accent); color: var(--accent); text-decoration: none; }
+
+        /* ── Alerts ─────────────────────────────────────────────── */
+        .alert {
+            padding: .75rem 1rem;
+            border-radius: 8px;
+            font-size: .85rem;
+            margin-bottom: 1.25rem;
+            border: 1px solid;
+        }
+        .alert-success { background: rgba(0,206,201,.08); border-color: rgba(0,206,201,.25); color: var(--success); }
+        .alert-error   { background: rgba(255,107,107,.08); border-color: rgba(255,107,107,.25); color: var(--danger); }
+        .alert-info    { background: rgba(108,92,231,.08);  border-color: rgba(108,92,231,.25);  color: var(--accent); }
+        .alert-warning { background: rgba(254,202,87,.08);  border-color: rgba(254,202,87,.25);  color: var(--warning); }
+
+        /* ── Error list ────────────────────────────────────────── */
+        .errorlist {
+            list-style: none;
+            padding: 0;
+            margin: .3rem 0 0;
+        }
+        .errorlist li {
+            color: var(--danger);
+            font-size: .8rem;
+        }
+
+        /* ── Table ──────────────────────────────────────────────── */
+        .table-wrap {
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            text-align: left;
+            padding: .75rem 1rem;
+            font-size: .875rem;
+        }
+        th {
+            color: var(--text-dim);
+            font-weight: 600;
+            font-size: .78rem;
+            text-transform: uppercase;
+            letter-spacing: .5px;
+            border-bottom: 1px solid var(--border);
+        }
+        td { border-bottom: 1px solid var(--border); }
+        tr:last-child td { border-bottom: none; }
+
+        /* ── Enrollment code badge ──────────────────────────────── */
+        .code-badge {
+            display: inline-block;
+            background: var(--accent-soft);
+            color: var(--accent);
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            font-weight: 700;
+            font-size: .85rem;
+            padding: .3rem .7rem;
+            border-radius: 6px;
+            letter-spacing: 1px;
+        }
+
+        /* ── Section heading row ────────────────────────────────── */
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+        }
+        .section-header h2 { margin-bottom: 0; }
+
+        /* ── Links row ──────────────────────────────────────────── */
+        .links-row {
+            display: flex;
+            justify-content: center;
+            gap: .75rem;
+            margin-top: 1.25rem;
+            font-size: .85rem;
+        }
+        .links-row .sep { color: var(--border); }
+
+        /* ── Empty state ────────────────────────────────────────── */
+        .empty { color: var(--text-dim); text-align: center; padding: 2rem 1rem; font-size: .9rem; }
+
+        /* ── Utility ────────────────────────────────────────────── */
+        .mb-1 { margin-bottom: .5rem; }
+        .mb-2 { margin-bottom: 1rem; }
+        .mt-2 { margin-top: 1rem; }
+        .text-center { text-align: center; }
+    </style>
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <nav class="navbar">
+        <a href="/" class="navbar-brand">Django<span>Quest</span></a>
+        <div class="navbar-links">
+            {% if user.is_authenticated %}
+                {% if user.is_teacher %}
+                    <a href="{% url 'dashboard:teacher_dashboard' %}">Dashboard</a>
+                {% else %}
+                    <a href="{% url 'dashboard:student_profile' %}">Profile</a>
+                {% endif %}
+                <a href="{% url 'dashboard:logout' %}">Log Out</a>
+            {% else %}
+                <a href="{% url 'dashboard:login' %}">Log In</a>
+                <a href="{% url 'dashboard:student_register' %}">Sign Up</a>
+            {% endif %}
+        </div>
+    </nav>
+
+    {% if messages %}
+    <div class="container" style="margin-bottom:0; padding-top:1.5rem; padding-bottom:0;">
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% block content %}{% endblock %}
+</body>
+</html>

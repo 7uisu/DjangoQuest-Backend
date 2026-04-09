@@ -1,0 +1,56 @@
+<!-- dashboard/templates/dashboard/teacher_dashboard.html -->
+{% extends "dashboard/base.html" %}
+{% block title %}Teacher Dashboard — DjangoQuest{% endblock %}
+
+{% block content %}
+<div class="container-wide">
+    <!-- Create Classroom -->
+    <div class="card mb-2">
+        <div class="section-header">
+            <div>
+                <h2>Your Classrooms</h2>
+                <p class="subtitle" style="margin-bottom:0;">Welcome, {{ user.username }}! Manage your classrooms below.</p>
+            </div>
+        </div>
+
+        <form method="post" novalidate style="display:flex; gap:.75rem; align-items:flex-end; margin-bottom:1.5rem;">
+            {% csrf_token %}
+            <div class="form-group" style="flex:1; margin-bottom:0;">
+                <label for="id_name">New Classroom</label>
+                {{ form.name }}
+                {% if form.name.errors %}<ul class="errorlist">{% for e in form.name.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+            </div>
+            <button type="submit" class="btn btn-success btn-sm" style="height:40px;">+ Create</button>
+        </form>
+
+        {% if classrooms %}
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Classroom</th>
+                        <th>Enrollment Code</th>
+                        <th>Students</th>
+                        <th>Created</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for c in classrooms %}
+                    <tr>
+                        <td>{{ c.name }}</td>
+                        <td><span class="code-badge">{{ c.enrollment_code }}</span></td>
+                        <td>{{ c.students.count }}</td>
+                        <td style="color:var(--text-dim);">{{ c.created_at|date:"M d, Y" }}</td>
+                        <td><a href="{% url 'dashboard:classroom_detail' c.id %}" class="btn btn-outline btn-sm">View</a></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="empty">You haven't created any classrooms yet. Create one above to get started!</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

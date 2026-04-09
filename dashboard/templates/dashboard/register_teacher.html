@@ -1,0 +1,53 @@
+<!-- dashboard/templates/dashboard/register_teacher.html -->
+{% extends "dashboard/base.html" %}
+{% block title %}Teacher Sign Up — DjangoQuest{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="card">
+        <h2>Create Teacher Account</h2>
+        <p class="subtitle">Register as an educator on DjangoQuest.</p>
+
+        <form method="post" novalidate>
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label for="id_username">Username</label>
+                {{ form.username }}
+                {% if form.username.errors %}<ul class="errorlist">{% for e in form.username.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="id_email">Email</label>
+                {{ form.email }}
+                {% if form.email.errors %}<ul class="errorlist">{% for e in form.email.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="id_password">Password</label>
+                {{ form.password }}
+                {% if form.password.errors %}<ul class="errorlist">{% for e in form.password.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="id_password_confirm">Confirm Password</label>
+                {{ form.password_confirm }}
+                {% if form.password_confirm.errors %}<ul class="errorlist">{% for e in form.password_confirm.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="id_educator_access_code">{{ form.educator_access_code.label }}</label>
+                {% if form.educator_access_code.help_text %}<span class="helptext">{{ form.educator_access_code.help_text }}</span>{% endif %}
+                {{ form.educator_access_code }}
+                {% if form.educator_access_code.errors %}<ul class="errorlist">{% for e in form.educator_access_code.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+            </div>
+
+            <button type="submit" class="btn btn-primary">Create Teacher Account</button>
+        </form>
+
+        <div class="links-row">
+            <a href="{% url 'dashboard:login' %}">Already have an account? Log in</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,37 @@
+<!-- dashboard/templates/dashboard/student_profile.html -->
+{% extends "dashboard/base.html" %}
+{% block title %}My Profile — DjangoQuest{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="card">
+        <h2>Welcome, {{ user.username }}!</h2>
+        <p class="subtitle">Your DjangoQuest student profile.</p>
+
+        <div style="display:grid; gap:1rem;">
+            <div>
+                <span style="font-size:.78rem; text-transform:uppercase; letter-spacing:.5px; color:var(--text-dim); font-weight:600;">In-Game Username</span>
+                <p style="font-size:1.1rem; font-weight:600; margin-top:.2rem;">{{ user.username }}</p>
+            </div>
+            <div>
+                <span style="font-size:.78rem; text-transform:uppercase; letter-spacing:.5px; color:var(--text-dim); font-weight:600;">Email</span>
+                <p style="margin-top:.2rem;">{{ user.email }}</p>
+            </div>
+            <div>
+                <span style="font-size:.78rem; text-transform:uppercase; letter-spacing:.5px; color:var(--text-dim); font-weight:600;">Total XP</span>
+                <p style="font-size:1.1rem; font-weight:700; color:var(--success); margin-top:.2rem;">{{ profile.total_xp }} XP</p>
+            </div>
+            <div>
+                <span style="font-size:.78rem; text-transform:uppercase; letter-spacing:.5px; color:var(--text-dim); font-weight:600;">Classroom</span>
+                <p style="margin-top:.2rem;">
+                    {% if profile.classroom %}
+                        {{ profile.classroom.name }}
+                    {% else %}
+                        <span style="color:var(--text-dim);">Not enrolled — enter a code in-game to join!</span>
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

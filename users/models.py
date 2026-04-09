@@ -1,4 +1,6 @@
 # users/models.py
+import string
+import random
 from django.db import models
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 
@@ -35,6 +37,8 @@ class User(AbstractUser):
     email = models.EmailField(unique=True)
     username = models.CharField(max_length=150, unique=True)
     is_verified = models.BooleanField(default=False)
+    is_teacher = models.BooleanField(default=False)
+    is_student = models.BooleanField(default=True)
     date_joined = models.DateTimeField(auto_now_add=True)
     
     objects = UserManager()
@@ -64,11 +68,59 @@ class User(AbstractUser):
         return self.email
 
 
+class EducatorAccessCode(models.Model):
+    """Pre-generated codes that teachers must enter to register."""
+    code = models.CharField(max_length=50, unique=True)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.code} ({'Active' if self.is_active else 'Inactive'})"
+
+
+def generate_enrollment_code():
+    """Generate a unique 8-character uppercase enrollment code."""
+    chars = string.ascii_uppercase + string.digits
+    while True:
+        code = ''.join(random.choices(chars, k=8))
+        if not Classroom.objects.filter(enrollment_code=code).exists():
+            return code
+
+
+class Classroom(models.Model):
+    """A classroom created by a teacher. Students enroll via the enrollment_code."""
+    teacher = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='classrooms',
+        limit_choices_to={'is_teacher': True},
+    )
+    name = models.CharField(max_length=200)
+    enrollment_code = models.CharField(
+        max_length=8,
+        unique=True,
+        default=generate_enrollment_code,
+        editable=False,
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.name} ({self.enrollment_code})"
+
+
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
     avatar = models.ImageField(upload_to="avatars/", null=True, blank=True)
     bio = models.TextField(blank=True)
     total_xp = models.IntegerField(default=0)
+    classroom = models.ForeignKey(
+        Classroom,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='students',
+        help_text='The classroom this student is enrolled in.',
+    )
     
     def __str__(self):
         return f"{self.user.username}'s Profile"

@@ -1,0 +1,47 @@
+<!-- dashboard/templates/dashboard/register_student.html -->
+{% extends "dashboard/base.html" %}
+{% block title %}Student Sign Up — DjangoQuest{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="card">
+        <h2>Create Student Account</h2>
+        <p class="subtitle">Sign up to start your DjangoQuest adventure.</p>
+
+        <form method="post" novalidate>
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label for="id_username">{{ form.username.label }}</label>
+                {% if form.username.help_text %}<span class="helptext">{{ form.username.help_text }}</span>{% endif %}
+                {{ form.username }}
+                {% if form.username.errors %}<ul class="errorlist">{% for e in form.username.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="id_email">Email</label>
+                {{ form.email }}
+                {% if form.email.errors %}<ul class="errorlist">{% for e in form.email.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="id_password">Password</label>
+                {{ form.password }}
+                {% if form.password.errors %}<ul class="errorlist">{% for e in form.password.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="id_password_confirm">Confirm Password</label>
+                {{ form.password_confirm }}
+                {% if form.password_confirm.errors %}<ul class="errorlist">{% for e in form.password_confirm.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+            </div>
+
+            <button type="submit" class="btn btn-primary">Create Account</button>
+        </form>
+
+        <div class="links-row">
+            <a href="{% url 'dashboard:login' %}">Already have an account? Log in</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

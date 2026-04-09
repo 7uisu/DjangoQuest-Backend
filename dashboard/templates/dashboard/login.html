@@ -1,0 +1,36 @@
+<!-- dashboard/templates/dashboard/login.html -->
+{% extends "dashboard/base.html" %}
+{% block title %}Log In — DjangoQuest{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="card">
+        <h2>Welcome Back</h2>
+        <p class="subtitle">Log in to your DjangoQuest account.</p>
+
+        <form method="post" novalidate>
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label for="id_email">Email</label>
+                {{ form.email }}
+                {% if form.email.errors %}<ul class="errorlist">{% for e in form.email.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="id_password">Password</label>
+                {{ form.password }}
+                {% if form.password.errors %}<ul class="errorlist">{% for e in form.password.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+            </div>
+
+            <button type="submit" class="btn btn-primary">Log In</button>
+        </form>
+
+        <div class="links-row">
+            <a href="{% url 'dashboard:student_register' %}">Student Sign Up</a>
+            <span class="sep">·</span>
+            <a href="{% url 'dashboard:teacher_register' %}">Teacher Sign Up</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

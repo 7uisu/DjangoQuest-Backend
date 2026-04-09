@@ -1,0 +1,53 @@
+<!-- dashboard/templates/dashboard/classroom_detail.html -->
+{% extends "dashboard/base.html" %}
+{% block title %}{{ classroom.name }} — DjangoQuest{% endblock %}
+
+{% block content %}
+<div class="container-wide">
+    <div class="card">
+        <a href="{% url 'dashboard:teacher_dashboard' %}" style="font-size:.85rem; color:var(--text-dim);">← Back to Dashboard</a>
+
+        <div class="section-header" style="margin-top:1rem;">
+            <div>
+                <h2>{{ classroom.name }}</h2>
+                <p class="subtitle" style="margin-bottom:0;">Enrollment Code: <span class="code-badge">{{ classroom.enrollment_code }}</span></p>
+            </div>
+        </div>
+
+        {% if students %}
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>XP</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for profile in students %}
+                    <tr>
+                        <td style="color:var(--text-dim);">{{ forloop.counter }}</td>
+                        <td>{{ profile.user.username }}</td>
+                        <td style="color:var(--text-dim);">{{ profile.user.email }}</td>
+                        <td>{{ profile.total_xp }} XP</td>
+                        <td>
+                            <a href="{% url 'dashboard:reset_student_password' classroom.id profile.user.id %}"
+                               class="btn btn-danger btn-sm"
+                               onclick="return confirm('Reset password for {{ profile.user.username }}?');">
+                                Reset Password
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="empty">No students have enrolled in this classroom yet.<br>Share the enrollment code <span class="code-badge">{{ classroom.enrollment_code }}</span> with your students!</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
