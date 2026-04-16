@@ -9,4 +9,5 @@ urlpatterns = [
     path('enroll/', views.GameEnrollView.as_view(), name='game_enroll'),
     path('unenroll/', views.GameUnenrollView.as_view(), name='game_unenroll'),
     path('save/', views.GameSaveView.as_view(), name='game_save'),
+    path('check-code/', views.GameCheckCodeView.as_view(), name='game_check_code'),
 ]

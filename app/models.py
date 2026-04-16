@@ -49,6 +49,16 @@ class TutorialStep(models.Model):
         help_text="JSON array of strings or patterns that should be in user's code"
     )
     checkpoint_xp = models.IntegerField(default=10, help_text="XP awarded for completing this step")
+    preview_context = models.TextField(
+        blank=True,
+        null=True,
+        help_text="JSON object of dummy variables to pass when rendering django template previews (e.g. {\"title\": \"My Blog\", \"posts\": [{\"title\": \"Post 1\"}]})"
+    )
+    base_template = models.TextField(
+        blank=True,
+        null=True,
+        help_text="Content of base.html available to the student's template via {% extends 'base.html' %}. Leave blank to use the default base template."
+    )
     
     def clean(self):
         # Validate that expected_elements is valid JSON
