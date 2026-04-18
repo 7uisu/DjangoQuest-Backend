@@ -10,4 +10,5 @@ urlpatterns = [
     path('unenroll/', views.GameUnenrollView.as_view(), name='game_unenroll'),
     path('save/', views.GameSaveView.as_view(), name='game_save'),
     path('check-code/', views.GameCheckCodeView.as_view(), name='game_check_code'),
+    path('ai-evaluator/', views.GameAIEvaluatorView.as_view(), name='game_ai_evaluator'),
 ]
