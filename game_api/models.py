@@ -22,6 +22,8 @@ class GameSave(models.Model):
     story_progress_percent = models.FloatField(default=0.0)
     challenges_completed = models.IntegerField(default=0)
     learning_modules_completed = models.IntegerField(default=0)
+    credits = models.IntegerField(default=0)
+    defeated_npcs = models.IntegerField(default=0)
     ch1_quiz_score = models.IntegerField(default=0)
     ch1_did_remedial = models.BooleanField(default=False)
     ch1_remedial_score = models.IntegerField(default=0)
@@ -71,10 +73,17 @@ class GameSave(models.Model):
         ch1_did_remedial = bool(save_data.get('ch1_did_remedial', False))
         ch1_remedial_score = int(save_data.get('ch1_remedial_score', 0))
 
+        # ── Currency ──
+        credits = int(save_data.get('credits', 0))
+        defeated_npcs_list = save_data.get('defeated_challenge_npcs', [])
+        defeated_npcs = len(defeated_npcs_list) if isinstance(defeated_npcs_list, list) else 0
+
         return {
             'story_progress_percent': story_pct,
             'challenges_completed': challenges,
             'learning_modules_completed': learning_done,
+            'credits': credits,
+            'defeated_npcs': defeated_npcs,
             'ch1_quiz_score': ch1_quiz_score,
             'ch1_did_remedial': ch1_did_remedial,
             'ch1_remedial_score': ch1_remedial_score,
