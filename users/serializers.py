@@ -64,40 +64,30 @@ class UserSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'is_verified', 'is_teacher', 'is_student', 'date_joined']
 
     def get_story_progress(self, obj) -> float:
-        try:
-            return obj.game_save.story_progress_percent
-        except GameSave.DoesNotExist:
+        game_save = getattr(obj, 'game_save', None)
+        if not game_save:
             return 0.0
+        return game_save.story_progress_percent
 
     def get_challenges_completed(self, obj) -> int:
-        try:
-            return obj.game_save.challenges_completed
-        except GameSave.DoesNotExist:
-            return 0
+        game_save = getattr(obj, 'game_save', None)
+        return game_save.challenges_completed if game_save else 0
 
     def get_learning_modules_completed(self, obj) -> int:
-        try:
-            return obj.game_save.learning_modules_completed
-        except GameSave.DoesNotExist:
-            return 0
+        game_save = getattr(obj, 'game_save', None)
+        return game_save.learning_modules_completed if game_save else 0
 
     def get_ch1_quiz_score(self, obj) -> int:
-        try:
-            return obj.game_save.ch1_quiz_score
-        except GameSave.DoesNotExist:
-            return 0
+        game_save = getattr(obj, 'game_save', None)
+        return game_save.ch1_quiz_score if game_save else 0
 
     def get_ch1_did_remedial(self, obj) -> bool:
-        try:
-            return obj.game_save.ch1_did_remedial
-        except GameSave.DoesNotExist:
-            return False
+        game_save = getattr(obj, 'game_save', None)
+        return game_save.ch1_did_remedial if game_save else False
 
     def get_ch1_remedial_score(self, obj) -> int:
-        try:
-            return obj.game_save.ch1_remedial_score
-        except GameSave.DoesNotExist:
-            return 0
+        game_save = getattr(obj, 'game_save', None)
+        return game_save.ch1_remedial_score if game_save else 0
 
     def get_detailed_grades(self, obj) -> list:
         professors = [
@@ -109,89 +99,87 @@ class UserSerializer(serializers.ModelSerializer):
             ("Professor Token", "ch2_y3s2"),
             ("Professor REST", "ch2_y3mid"),
         ]
-        
-        try:
-            sd = obj.game_save.save_data
-            if not isinstance(sd, dict): sd = {}
-            
-            payload = []
-            for prof_name, prefix in professors:
-                grade = sd.get(f"{prefix}_final_grade", "Not Attempted")
-                try:
-                    if float(grade) <= 0.0:
-                        grade = "Not Attempted"
-                except (ValueError, TypeError):
-                    pass
-                
-                retakes = sd.get(f"{prefix}_retake_count", "Not Attempted") if grade != "Not Attempted" else "Not Attempted"
-                removal = sd.get(f"{prefix}_removal_passed", "Not Attempted") if grade != "Not Attempted" else "Not Attempted"
-                
-                prof_data = {
-                    "professor": prof_name,
-                    "grade": grade,
-                    "retakes": retakes,
-                    "removal_exam": removal
+        not_attempted = [
+            {"professor": n, "grade": "Not Attempted",
+            "retakes": "Not Attempted", "removal_exam": "Not Attempted"}
+            for n, _ in professors
+        ]
+
+        game_save = getattr(obj, 'game_save', None)
+        if not game_save:
+            return not_attempted
+
+        sd = game_save.save_data
+        if not isinstance(sd, dict):
+            return not_attempted
+
+        payload = []
+        for prof_name, prefix in professors:
+            grade = sd.get(f"{prefix}_final_grade", "Not Attempted")
+            try:
+                if float(grade) <= 0.0:
+                    grade = "Not Attempted"
+            except (ValueError, TypeError):
+                pass
+
+            retakes = sd.get(f"{prefix}_retake_count", "Not Attempted") if grade != "Not Attempted" else "Not Attempted"
+            removal = sd.get(f"{prefix}_removal_passed", "Not Attempted") if grade != "Not Attempted" else "Not Attempted"
+
+            prof_data = {
+                "professor": prof_name,
+                "grade": grade,
+                "retakes": retakes,
+                "removal_exam": removal
+            }
+
+            if prefix == "ch2_y2s2":
+                prof_data["ai_data"] = {
+                    "ai_oto_skipped": sd.get("ch2_y2s2_ai_oto_skipped", False),
+                    "ai_otm_skipped": sd.get("ch2_y2s2_ai_otm_skipped", False),
+                    "ai_mtm_skipped": sd.get("ch2_y2s2_ai_mtm_skipped", False),
+                    "ai_fully_offline": sd.get("ch2_y2s2_ai_fully_offline", False)
                 }
-                
-                if prefix == "ch2_y2s2":
-                    prof_data["ai_data"] = {
-                        "ai_oto_skipped": sd.get("ch2_y2s2_ai_oto_skipped", False),
-                        "ai_otm_skipped": sd.get("ch2_y2s2_ai_otm_skipped", False),
-                        "ai_mtm_skipped": sd.get("ch2_y2s2_ai_mtm_skipped", False),
-                        "ai_fully_offline": sd.get("ch2_y2s2_ai_fully_offline", False)
-                    }
-                
-                payload.append(prof_data)
-                
-            return payload
-        except GameSave.DoesNotExist:
-            payload = []
-            for prof_name, _ in professors:
-                payload.append({
-                    "professor": prof_name,
-                    "grade": "Not Attempted",
-                    "retakes": "Not Attempted",
-                    "removal_exam": "Not Attempted"
-                })
-            return payload
+
+            payload.append(prof_data)
+
+        return payload
 
     def get_story_mode_gwa(self, obj) -> float:
-        professors = ["ch2_y1s1", "ch2_y1s2", "ch2_y2s1", "ch2_y2s2", "ch2_y3s1", "ch2_y3s2", "ch2_y3mid"]
-        try:
-            sd = obj.game_save.save_data
-            if not isinstance(sd, dict): return 0.0
-            
-            total = 0.0
-            count = 0
-            for prefix in professors:
-                grade = sd.get(f"{prefix}_final_grade", 0.0)
-                if isinstance(grade, (int, float)) and float(grade) > 0.0:
-                    total += float(grade)
-                    count += 1
-            return round(total / count, 2) if count > 0 else 0.0
-        except GameSave.DoesNotExist:
+        game_save = getattr(obj, 'game_save', None)
+        if not game_save:
             return 0.0
+        sd = game_save.save_data
+        if not isinstance(sd, dict):
+            return 0.0
+        professors = ["ch2_y1s1", "ch2_y1s2", "ch2_y2s1", "ch2_y2s2", "ch2_y3s1", "ch2_y3s2", "ch2_y3mid"]
+        total, count = 0.0, 0
+        for prefix in professors:
+            grade = sd.get(f"{prefix}_final_grade", 0.0)
+            if isinstance(grade, (int, float)) and float(grade) > 0.0:
+                total += float(grade)
+                count += 1
+        return round(total / count, 2) if count > 0 else 0.0
 
     def get_learning_mode_gwa(self, obj) -> float:
-        try:
-            sd = obj.game_save.save_data
-            if not isinstance(sd, dict): return 0.0
-            lmg = sd.get('learning_mode_grades', {})
-            if not isinstance(lmg, dict) or not lmg: return 0.0
-            
-            total = 0.0
-            count = 0
-            for k, v in lmg.items():
-                try:
-                    f_val = float(v)
-                    if f_val > 0.0:
-                        total += f_val
-                        count += 1
-                except (ValueError, TypeError):
-                    continue
-            return round(total / count, 2) if count > 0 else 0.0
-        except GameSave.DoesNotExist:
+        game_save = getattr(obj, 'game_save', None)
+        if not game_save:
             return 0.0
+        sd = game_save.save_data
+        if not isinstance(sd, dict):
+            return 0.0
+        lmg = sd.get('learning_mode_grades', {})
+        if not isinstance(lmg, dict) or not lmg:
+            return 0.0
+        total, count = 0.0, 0
+        for v in lmg.values():
+            try:
+                f_val = float(v)
+                if f_val > 0.0:
+                    total += f_val
+                    count += 1
+            except (ValueError, TypeError):
+                continue
+        return round(total / count, 2) if count > 0 else 0.0
 
     def get_learning_mode_detailed_grades(self, obj) -> list:
         professors = [
@@ -203,22 +191,24 @@ class UserSerializer(serializers.ModelSerializer):
             ("Professor Auth", "auth"),
             ("Professor REST", "rest"),
         ]
-        try:
-            sd = obj.game_save.save_data
-            if not isinstance(sd, dict): return []
-            lmg = sd.get('learning_mode_grades', {})
-            if not isinstance(lmg, dict) or not lmg: return []
-            payload = []
-            for prof_name, key in professors:
-                if key in lmg:
-                    payload.append({
-                        "professor": prof_name,
-                        "grade": round(float(lmg[key]), 2),
-                        "label": self._grade_to_label(float(lmg[key]))
-                    })
-            return payload
-        except GameSave.DoesNotExist:
+        game_save = getattr(obj, 'game_save', None)
+        if not game_save:
             return []
+        sd = game_save.save_data
+        if not isinstance(sd, dict):
+            return []
+        lmg = sd.get('learning_mode_grades', {})
+        if not isinstance(lmg, dict) or not lmg:
+            return []
+        payload = []
+        for prof_name, key in professors:
+            if key in lmg:
+                payload.append({
+                    "professor": prof_name,
+                    "grade": round(float(lmg[key]), 2),
+                    "label": self._grade_to_label(float(lmg[key]))
+                })
+        return payload
 
     @staticmethod
     def _grade_to_label(grade: float) -> str:

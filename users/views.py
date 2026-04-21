@@ -29,7 +29,11 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
     permission_classes = [permissions.IsAuthenticated]
     
     def get_object(self):
-        return self.request.user
+        return User.objects.select_related(
+            'profile', 'game_save'
+        ).prefetch_related(
+            'achievements__achievement'
+        ).get(pk=self.request.user.pk)
     
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)
