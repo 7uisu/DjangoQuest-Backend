@@ -104,6 +104,26 @@ class StudentSerializer(serializers.ModelSerializer):
                         "ai_mtm_skipped": sd.get("ch2_y2s2_ai_mtm_skipped", False),
                         "ai_fully_offline": sd.get("ch2_y2s2_ai_fully_offline", False)
                     }
+                elif prefix == "ch2_y1s2":
+                    prof_data["ai_data"] = {
+                        "ai_data_types_skipped": sd.get("ch2_y1s2_ai_data_types_skipped", False),
+                        "ai_fully_offline": sd.get("ch2_y1s2_ai_fully_offline", False)
+                    }
+                elif prefix == "ch2_y2s1":
+                    prof_data["ai_data"] = {
+                        "ai_url_routing_skipped": sd.get("ch2_y2s1_ai_url_routing_skipped", False),
+                        "ai_fully_offline": sd.get("ch2_y2s1_ai_fully_offline", False)
+                    }
+                elif prefix == "ch2_y3s1":
+                    prof_data["ai_data"] = {
+                        "ai_auth_checker_skipped": sd.get("ch2_y3s2_ai_auth_checker_skipped", False),
+                        "ai_fully_offline": sd.get("ch2_y3s2_ai_fully_offline", False)
+                    }
+                elif prefix == "ch2_y3mid":
+                    prof_data["ai_data"] = {
+                        "ai_http_verbs_skipped": sd.get("ch2_y3mid_ai_http_verbs_skipped", False),
+                        "ai_fully_offline": sd.get("ch2_y3mid_ai_fully_offline", False)
+                    }
                 
                 payload.append(prof_data)
                 
