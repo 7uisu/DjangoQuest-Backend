@@ -55,13 +55,15 @@ class UserSerializer(serializers.ModelSerializer):
     story_mode_gwa = serializers.SerializerMethodField()
     learning_mode_gwa = serializers.SerializerMethodField()
     learning_mode_detailed_grades = serializers.SerializerMethodField()
+    certificates = serializers.SerializerMethodField()
     
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'is_verified', 'is_teacher', 'is_student', 'date_joined', 'profile', 'achievements',
+        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'is_verified', 'is_teacher', 'is_student', 'is_staff', 'is_superuser', 'date_joined', 'profile', 'achievements',
                   'story_progress', 'challenges_completed', 'learning_modules_completed',
-                  'ch1_quiz_score', 'ch1_did_remedial', 'ch1_remedial_score', 'detailed_grades', 'story_mode_gwa', 'learning_mode_gwa', 'learning_mode_detailed_grades']
-        read_only_fields = ['id', 'is_verified', 'is_teacher', 'is_student', 'date_joined']
+                  'ch1_quiz_score', 'ch1_did_remedial', 'ch1_remedial_score', 'detailed_grades', 'story_mode_gwa', 'learning_mode_gwa', 'learning_mode_detailed_grades',
+                  'certificates']
+        read_only_fields = ['id', 'is_verified', 'is_teacher', 'is_student', 'is_staff', 'is_superuser', 'date_joined']
 
     def get_story_progress(self, obj) -> float:
         game_save = getattr(obj, 'game_save', None)
@@ -230,6 +232,49 @@ class UserSerializer(serializers.ModelSerializer):
                 })
         return payload
 
+    PROFESSOR_CERTS = [
+        ("y1s1", "Professor Markup", "HTML Basics"),
+        ("y1s2", "Professor Syntax", "Python Data Types"),
+        ("y2s1", "Professor View", "Django Views & URL Routing"),
+        ("y2s2", "Professor Query", "Django ORM & Relationships"),
+        ("y3s1", "Professor Auth", "Authentication & Security"),
+        ("y3s2", "Professor Token", "Token-Based Auth"),
+        ("y3mid", "Professor REST", "RESTful API Design"),
+    ]
+
+    def get_certificates(self, obj) -> list:
+        game_save = getattr(obj, 'game_save', None)
+        sd = game_save.save_data if game_save and isinstance(game_save.save_data, dict) else {}
+
+        certs = []
+        all_done = True
+        latest_ts = None
+        for key, name, topic in self.PROFESSOR_CERTS:
+            done = bool(sd.get(f"ch2_{key}_teaching_done", False))
+            ts = sd.get(f"ch2_{key}_teaching_done_at", None)
+            if not done:
+                all_done = False
+            if ts and (latest_ts is None or ts > latest_ts):
+                latest_ts = ts
+            certs.append({
+                "id": f"CERT-{obj.id}-{key}",
+                "professor": name,
+                "topic": topic,
+                "professor_key": key,
+                "completed": done,
+                "completed_at": ts,
+            })
+        # Grand completion certificate
+        certs.append({
+            "id": f"CERT-{obj.id}-grand",
+            "professor": "DjangoQuest",
+            "topic": "Full-Stack Django Development",
+            "professor_key": "grand",
+            "completed": all_done,
+            "completed_at": latest_ts if all_done else None,
+        })
+        return certs
+
     @staticmethod
     def _grade_to_label(grade: float) -> str:
         if grade <= 1.0: return "1.0 (Excellent)"
@@ -271,17 +316,46 @@ class UserProfileUpdateSerializer(serializers.ModelSerializer):
         return instance
 
 class RegisterSerializer(serializers.ModelSerializer):
-    """Serializer for creating new users with optional role selection"""
+    """Serializer for creating new users with mandatory name and role selection"""
     email = serializers.EmailField(
         required=True,
-        validators=[UniqueValidator(queryset=User.objects.all())]
+        validators=[UniqueValidator(
+            queryset=User.objects.all(),
+            message="This email is already registered. Try logging in instead."
+        )],
+        error_messages={
+            'required': 'Please enter your email address.',
+            'invalid': 'Please enter a valid email address (e.g. name@example.com).',
+        }
     )
     password = serializers.CharField(
         write_only=True, 
         required=True, 
-        validators=[validate_password]
+        validators=[validate_password],
+        error_messages={
+            'required': 'Please create a password.',
+        }
     )
-    password2 = serializers.CharField(write_only=True, required=True)
+    password2 = serializers.CharField(
+        write_only=True, required=True,
+        error_messages={
+            'required': 'Please confirm your password.',
+        }
+    )
+    first_name = serializers.CharField(
+        required=True, max_length=150,
+        error_messages={
+            'required': 'Please enter your first name.',
+            'blank': 'First name cannot be blank.',
+        }
+    )
+    last_name = serializers.CharField(
+        required=True, max_length=150,
+        error_messages={
+            'required': 'Please enter your last name.',
+            'blank': 'Last name cannot be blank.',
+        }
+    )
     role = serializers.ChoiceField(
         choices=['student', 'teacher'],
         default='student',
@@ -297,10 +371,22 @@ class RegisterSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['username', 'email', 'password', 'password2', 'first_name', 'last_name', 'role', 'educator_code']
+        extra_kwargs = {
+            'username': {
+                'error_messages': {
+                    'required': 'Please choose a username.',
+                    'unique': 'This username is already taken. Please choose a different one.',
+                },
+                'validators': [UniqueValidator(
+                    queryset=User.objects.all(),
+                    message="This username is already taken. Please choose a different one."
+                )],
+            }
+        }
 
     def validate(self, attrs):
         if attrs['password'] != attrs['password2']:
-            raise serializers.ValidationError({"password": "Password fields didn't match."})
+            raise serializers.ValidationError({"password2": "Passwords do not match. Please try again."})
 
         role = attrs.get('role', 'student')
         if role == 'teacher':

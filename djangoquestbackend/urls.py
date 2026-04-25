@@ -11,6 +11,9 @@ urlpatterns = [
     path('api/users/', include('users.urls')),
     path('api/game/', include('game_api.urls')),
     path('api/dashboard/', include('dashboard.api_urls')),
+    path('api/admin/', include('users.admin_urls')),
+    path('api/feedback/', include('feedback.urls')),
+    path('api/announcements/', include('announcements.urls')),
     path('', include('dashboard.urls')),
 ]
 

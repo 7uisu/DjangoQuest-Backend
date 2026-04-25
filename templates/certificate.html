@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  @page {
+    size: 1056px 816px;
+    margin: 0;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    width: 1056px;
+    height: 816px;
+    font-family: 'Georgia', 'Times New Roman', serif;
+    color: #1a1a2e;
+    background: #fdfcf9;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Outer decorative border */
+  .border-outer {
+    position: absolute;
+    top: 12px; left: 12px; right: 12px; bottom: 12px;
+    border: 4px solid {{ border_color }};
+    border-radius: 8px;
+  }
+  .border-inner {
+    position: absolute;
+    top: 24px; left: 24px; right: 24px; bottom: 24px;
+    border: 2px solid {{ border_color }};
+    border-radius: 4px;
+  }
+
+  /* Corner ornaments */
+  .corner { position: absolute; font-size: 28px; color: {{ border_color }}; opacity: 0.6; }
+  .corner-tl { top: 30px; left: 32px; }
+  .corner-tr { top: 30px; right: 32px; }
+  .corner-bl { bottom: 30px; left: 32px; }
+  .corner-br { bottom: 30px; right: 32px; }
+
+  .content {
+    position: absolute;
+    top: 60px; left: 60px; right: 60px; bottom: 60px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .logo-img {
+    width: 80px;
+    height: 80px;
+    margin-bottom: 6px;
+    object-fit: contain;
+  }
+  .logo-text {
+    font-size: 20px;
+    letter-spacing: 6px;
+    text-transform: uppercase;
+    color: {{ accent_color }};
+    font-weight: bold;
+    margin-bottom: 8px;
+  }
+  .title {
+    font-size: 42px;
+    font-weight: bold;
+    color: {{ title_color }};
+    margin-bottom: 6px;
+    letter-spacing: 2px;
+  }
+  .subtitle {
+    font-size: 16px;
+    color: #666;
+    margin-bottom: 36px;
+    letter-spacing: 1px;
+  }
+  .label {
+    font-size: 14px;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    margin-bottom: 8px;
+  }
+  .student-name {
+    font-size: 38px;
+    font-weight: bold;
+    color: #1a1a2e;
+    border-bottom: 3px solid {{ border_color }};
+    padding-bottom: 6px;
+    margin-bottom: 28px;
+    min-width: 400px;
+  }
+  .completion-text {
+    font-size: 16px;
+    color: #444;
+    margin-bottom: 12px;
+    line-height: 1.6;
+  }
+  .topic-name {
+    font-size: 28px;
+    font-weight: bold;
+    color: {{ accent_color }};
+    margin-bottom: 32px;
+    letter-spacing: 1px;
+  }
+  .date {
+    font-size: 14px;
+    color: #777;
+    margin-bottom: 8px;
+  }
+  .cert-id {
+    font-size: 11px;
+    color: #bbb;
+    letter-spacing: 2px;
+    font-family: 'Courier New', monospace;
+  }
+  .divider {
+    width: 120px;
+    height: 2px;
+    background: {{ border_color }};
+    margin: 16px auto;
+    opacity: 0.5;
+  }
+</style>
+</head>
+<body>
+  <div class="border-outer"></div>
+  <div class="border-inner"></div>
+  <div class="corner corner-tl">✦</div>
+  <div class="corner corner-tr">✦</div>
+  <div class="corner corner-bl">✦</div>
+  <div class="corner corner-br">✦</div>
+
+  <div class="content">
+    {% if logo_data_uri %}<img class="logo-img" src="{{ logo_data_uri }}" alt="DjangoQuest Logo">{% endif %}
+    <div class="logo-text">DjangoQuest</div>
+    <div class="title">{{ title }}</div>
+    <div class="subtitle">{{ subtitle }}</div>
+
+    <div class="label">This certifies that</div>
+    <div class="student-name">{{ student_name }}</div>
+
+    <div class="completion-text">has successfully completed the coursework for</div>
+    <div class="topic-name">{{ topic }}</div>
+
+    <div class="divider"></div>
+
+    <div class="date">Completed on {{ completed_at }}</div>
+    <div class="cert-id">{{ cert_id }}</div>
+  </div>
+</body>
+</html>

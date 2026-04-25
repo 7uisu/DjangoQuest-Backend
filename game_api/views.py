@@ -100,6 +100,8 @@ class GameLoginView(APIView):
             'access': str(refresh.access_token),
             'refresh': str(refresh),
             'username': user.username,
+            'first_name': user.first_name,
+            'last_name': user.last_name,
         }, status=status.HTTP_200_OK)
 
 

@@ -8,7 +8,8 @@ from rest_framework_simplejwt.views import (
 from .views import (
     RegisterView, UserProfileView, LogoutView,
     AchievementViewSet, UserAchievementView,
-    PasswordResetView, PasswordResetConfirmView  # Import the new views
+    PasswordResetView, PasswordResetConfirmView,
+    CertificateVerifyView, CertificateImageView,
 )
 
 # Set up router for viewsets
@@ -21,8 +22,10 @@ urlpatterns = [
     path('register/', RegisterView.as_view(), name='register'),
     path('profile/', UserProfileView.as_view(), name='user_profile'),
     path('logout/', LogoutView.as_view(), name='logout'),
-    path('password-reset/', PasswordResetView.as_view(), name='password_reset'),  # Add this
-    path('password-reset-confirm/', PasswordResetConfirmView.as_view(), name='password_reset_confirm'),  # Add this
+    path('password-reset/', PasswordResetView.as_view(), name='password_reset'),
+    path('password-reset-confirm/', PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
     path('user-achievements/', UserAchievementView.as_view(), name='user_achievements'),
+    path('certificates/verify/<str:cert_id>/', CertificateVerifyView.as_view(), name='certificate_verify'),
+    path('certificates/<str:professor_key>/image/', CertificateImageView.as_view(), name='certificate_image'),
     path('', include(router.urls)),
 ]

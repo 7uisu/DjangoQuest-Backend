@@ -41,6 +41,8 @@ INSTALLED_APPS = [
     'users.apps.UsersConfig',
     'dashboard.apps.DashboardConfig',
     'game_api.apps.GameApiConfig',
+    'feedback.apps.FeedbackConfig',
+    'announcements.apps.AnnouncementsConfig',
     'rest_framework',
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
@@ -129,7 +131,7 @@ ROOT_URLCONF = 'djangoquestbackend.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,  # finds dashboard/templates/
         'OPTIONS': {
             'context_processors': [

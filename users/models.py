@@ -121,6 +121,18 @@ class Profile(models.Model):
         related_name='students',
         help_text='The classroom this student is enrolled in.',
     )
+
+    def save(self, *args, **kwargs):
+        # Delete old avatar file when a new one is uploaded
+        try:
+            old = Profile.objects.get(pk=self.pk)
+            if old.avatar and old.avatar != self.avatar:
+                import os
+                if os.path.isfile(old.avatar.path):
+                    os.remove(old.avatar.path)
+        except Profile.DoesNotExist:
+            pass
+        super().save(*args, **kwargs)
     
     def __str__(self):
         return f"{self.user.username}'s Profile"
@@ -147,3 +159,19 @@ class UserAchievement(models.Model):
     
     def __str__(self):
         return f"{self.user.username} unlocked {self.achievement.name}"
+
+
+class AuditLog(models.Model):
+    """Tracks admin actions for accountability."""
+    admin = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='audit_logs')
+    action = models.CharField(max_length=200)
+    target_type = models.CharField(max_length=50)  # user, classroom, feedback, announcement
+    target_id = models.IntegerField(null=True, blank=True)
+    details = models.TextField(blank=True, default='')
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-timestamp']
+
+    def __str__(self):
+        return f"[{self.timestamp}] {self.admin} — {self.action}"
