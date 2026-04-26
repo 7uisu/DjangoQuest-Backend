@@ -1,39 +1,36 @@
 # app/admin.py
 from django.contrib import admin
-from .models import Tutorial, TutorialStep, UserTutorialEnrollment, UserStepSubmission
+from .models import (
+    VideoTutorial, VideoStep, UserVideoEnrollment, UserVideoStepView
+)
 
-
-class TutorialStepInline(admin.TabularInline):
-    model = TutorialStep
+class VideoStepInline(admin.TabularInline):
+    model = VideoStep
     extra = 1
-    fields = ('order', 'title', 'file_type', 'initial_code', 'solution_code', 'expected_elements', 'checkpoint_xp', 'trivia')
+    fields = ('order', 'title')
 
-
-@admin.register(Tutorial)
-class TutorialAdmin(admin.ModelAdmin):
+@admin.register(VideoTutorial)
+class VideoTutorialAdmin(admin.ModelAdmin):
     list_display = ('title', 'order', 'is_active', 'created_at')
     list_filter = ('is_active',)
     search_fields = ('title', 'description')
     ordering = ('order',)
-    inlines = [TutorialStepInline]
+    inlines = [VideoStepInline]
 
-
-@admin.register(TutorialStep)
-class TutorialStepAdmin(admin.ModelAdmin):
-    list_display = ('tutorial', 'order', 'title', 'file_type', 'checkpoint_xp')
-    list_filter = ('file_type', 'tutorial')
+@admin.register(VideoStep)
+class VideoStepAdmin(admin.ModelAdmin):
+    list_display = ('tutorial', 'order', 'title')
+    list_filter = ('tutorial',)
     search_fields = ('title', 'content')
     ordering = ('tutorial', 'order')
 
-
-@admin.register(UserTutorialEnrollment)
-class UserTutorialEnrollmentAdmin(admin.ModelAdmin):
+@admin.register(UserVideoEnrollment)
+class UserVideoEnrollmentAdmin(admin.ModelAdmin):
     list_display = ('user', 'tutorial', 'is_completed', 'started_at')
     list_filter = ('is_completed', 'tutorial')
     search_fields = ('user__username',)
 
-
-@admin.register(UserStepSubmission)
-class UserStepSubmissionAdmin(admin.ModelAdmin):
-    list_display = ('enrollment', 'step', 'is_completed', 'attempt_count', 'last_attempt_at')
-    list_filter = ('is_completed',)
+@admin.register(UserVideoStepView)
+class UserVideoStepViewAdmin(admin.ModelAdmin):
+    list_display = ('enrollment', 'step', 'viewed_at')
+    search_fields = ('enrollment__user__username',)

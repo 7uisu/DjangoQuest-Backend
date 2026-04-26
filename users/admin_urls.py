@@ -20,6 +20,14 @@ from .admin_views import (
     AdminInviteCodeView,
 )
 
+from app.admin_views import (
+
+    AdminVideoTutorialListView,
+    AdminVideoTutorialDetailView,
+    AdminVideoStepListView,
+    AdminVideoStepDetailView
+)
+
 urlpatterns = [
     path('stats/', AdminStatsView.as_view(), name='admin_stats'),
 
@@ -50,4 +58,12 @@ urlpatterns = [
 
     # Settings
     path('invite-codes/', AdminInviteCodeView.as_view(), name='admin_invite_codes'),
+
+
+
+    # Video Tutorials
+    path('video-tutorials/', AdminVideoTutorialListView.as_view()),
+    path('video-tutorials/<int:pk>/', AdminVideoTutorialDetailView.as_view()),
+    path('video-tutorials/<int:tutorial_id>/steps/', AdminVideoStepListView.as_view()),
+    path('video-tutorials/steps/<int:pk>/', AdminVideoStepDetailView.as_view()),
 ]

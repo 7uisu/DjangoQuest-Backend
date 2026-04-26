@@ -21,7 +21,9 @@ class AnnouncementListCreateView(generics.ListCreateAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        if user.is_staff:
+        scope = self.request.query_params.get('scope', None)
+
+        if user.is_staff and scope != 'teacher':
             return Announcement.objects.prefetch_related('target_classrooms').select_related('author').all()
 
         q = Q(announcement_type='platform')

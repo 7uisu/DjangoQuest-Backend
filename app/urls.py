@@ -3,10 +3,11 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    path('tutorials/', views.TutorialListView.as_view(), name='tutorial_list'),
-    path('user/progress/', views.UserProgressView.as_view(), name='user_progress'),
-    path('check-code/', views.CheckCodeView.as_view(), name='check_code'),
-    path('render-template/', views.RenderDjangoTemplateView.as_view(), name='render_template'),
-    path('tutorials/<int:tutorial_id>/complete/', views.TutorialCompleteView.as_view(), name='tutorial_complete'),
-    path('user/reset-progress/', views.ResetProgressView.as_view(), name='reset-progress'),
+    # Video URLs
+    path('video/', views.VideoTutorialListView.as_view()),
+    path('video/progress/', views.VideoProgressView.as_view()),
+    path('video/<int:tutorial_id>/complete/', views.VideoCompleteView.as_view()),
+    
+    # Global Reset
+    path('user/reset-progress/', views.ResetProgressView.as_view()),
 ]

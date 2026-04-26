@@ -1,123 +1,97 @@
-#app/models.py
 from django.db import models
 from django.core.exceptions import ValidationError
 import json
 from users.models import User
 
-class Tutorial(models.Model):
+
+
+
+
+# ──────────────────────────────────────────────
+# VIDEO TUTORIALS
+# ──────────────────────────────────────────────
+
+class VideoTutorial(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField()
-    order = models.IntegerField(unique=True)
-    prerequisite = models.ForeignKey(
-        'self', 
-        on_delete=models.SET_NULL, 
-        null=True, 
+    video_url = models.URLField(help_text="YouTube URL for the tutorial video")
+    topic = models.CharField(
+        max_length=50,
         blank=True,
-        related_name='unlocks'
+        default='',
+        help_text="e.g., HTML, CSS, Django"
+    )
+    order = models.IntegerField(
+        help_text="Display order among video tutorials"
     )
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
+
     def __str__(self):
         return self.title
-    
+
     class Meta:
         ordering = ['order']
 
-class TutorialStep(models.Model):
-    FILE_TYPE_CHOICES = (
-        ('python', 'Python'),
-        ('html', 'HTML'),
-        ('css', 'CSS'),
-        ('js', 'JavaScript'),
-        ('django', 'Django Template'),
-        ('html+css', 'HTML + CSS'),
+
+class VideoStep(models.Model):
+    tutorial = models.ForeignKey(
+        VideoTutorial,
+        on_delete=models.CASCADE,
+        related_name='steps'
     )
-    
-    tutorial = models.ForeignKey(Tutorial, on_delete=models.CASCADE, related_name="steps")
     title = models.CharField(max_length=255)
-    content = models.TextField(help_text="HTML content with instructions")
+    content = models.TextField(
+        help_text="Text log describing what is covered at this point in the video"
+    )
     order = models.IntegerField()
-    file_type = models.CharField(max_length=20, choices=FILE_TYPE_CHOICES, default='python')
-    initial_code = models.TextField(blank=True, help_text="Starting code the user will see")
-    solution_code = models.TextField(help_text="Complete solution code")
-    trivia = models.TextField(blank=True, null=True, help_text="Trivia shown after completing this step"
-    )
-    expected_elements = models.TextField(
-        blank=True, 
-        help_text="JSON array of strings or patterns that should be in user's code"
-    )
-    checkpoint_xp = models.IntegerField(default=10, help_text="XP awarded for completing this step")
-    preview_context = models.TextField(
-        blank=True,
-        null=True,
-        help_text="JSON object of dummy variables to pass when rendering django template previews (e.g. {\"title\": \"My Blog\", \"posts\": [{\"title\": \"Post 1\"}]})"
-    )
-    base_template = models.TextField(
-        blank=True,
-        null=True,
-        help_text="Content of base.html available to the student's template via {% extends 'base.html' %}. Leave blank to use the default base template."
-    )
-    
-    def clean(self):
-        # Validate that expected_elements is valid JSON
-        if self.expected_elements:
-            try:
-                json.loads(self.expected_elements)
-            except json.JSONDecodeError:
-                raise ValidationError({'expected_elements': 'Must be valid JSON array'})
-    
-    def get_expected_elements(self):
-        """Return expected elements as a Python list"""
-        if not self.expected_elements:
-            return []
-        return json.loads(self.expected_elements)
-    
+
     def __str__(self):
-        return f"{self.tutorial.title} - Step {self.order}: {self.title}"
-    
+        return f"{self.tutorial.title} — Step {self.order}: {self.title}"
+
     class Meta:
         ordering = ['tutorial', 'order']
         unique_together = ['tutorial', 'order']
 
-class UserTutorialEnrollment(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="tutorial_enrollments")
-    tutorial = models.ForeignKey(Tutorial, on_delete=models.CASCADE)
-    is_completed = models.BooleanField(default=False)
-    current_step = models.ForeignKey(
-        TutorialStep, 
-        on_delete=models.SET_NULL, 
-        null=True, 
-        blank=True,
-        related_name="+"
+
+class UserVideoEnrollment(models.Model):
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='video_enrollments'
     )
+    tutorial = models.ForeignKey(
+        VideoTutorial,
+        on_delete=models.CASCADE,
+        related_name='enrollments'
+    )
+    is_completed = models.BooleanField(default=False)
     started_at = models.DateTimeField(auto_now_add=True)
     completed_at = models.DateTimeField(null=True, blank=True)
-    
+
     def __str__(self):
         status = "Completed" if self.is_completed else "In Progress"
-        return f"{self.user.username} - {self.tutorial.title} ({status})"
-    
+        return f"{self.user.username} — {self.tutorial.title} ({status})"
+
     class Meta:
         unique_together = ['user', 'tutorial']
 
-class UserStepSubmission(models.Model):
+
+class UserVideoStepView(models.Model):
     enrollment = models.ForeignKey(
-        UserTutorialEnrollment, 
-        on_delete=models.CASCADE, 
-        related_name="step_submissions"
+        UserVideoEnrollment,
+        on_delete=models.CASCADE,
+        related_name='step_views'
     )
-    step = models.ForeignKey(TutorialStep, on_delete=models.CASCADE)
-    user_code = models.TextField()
-    is_completed = models.BooleanField(default=False)
-    attempt_count = models.IntegerField(default=1)
-    last_attempt_at = models.DateTimeField(auto_now=True)
-    completed_at = models.DateTimeField(null=True, blank=True)
-    
+    step = models.ForeignKey(
+        VideoStep,
+        on_delete=models.CASCADE
+    )
+    viewed_at = models.DateTimeField(auto_now_add=True)
+
     def __str__(self):
-        status = "Completed" if self.is_completed else "In Progress"
-        return f"{self.enrollment.user.username} - {self.step.title} ({status})"
-    
+        return f"{self.enrollment.user.username} — {self.step.title}"
+
     class Meta:
         unique_together = ['enrollment', 'step']
