@@ -29,7 +29,7 @@ class AchievementSerializer(serializers.ModelSerializer):
     """Serializer for achievements"""
     class Meta:
         model = Achievement
-        fields = ['id', 'name', 'description', 'xp_reward']
+        fields = ['id', 'key', 'name', 'description', 'xp_reward']
         read_only_fields = ['id']
 
 class UserAchievementSerializer(serializers.ModelSerializer):

@@ -1,7 +1,7 @@
 # dashboard/api_serializers.py
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
-from users.models import Classroom, Profile
+from users.models import Classroom, Profile, UserAchievement
 from game_api.models import GameSave
 
 User = get_user_model()
@@ -19,12 +19,20 @@ class StudentSerializer(serializers.ModelSerializer):
     story_mode_gwa = serializers.SerializerMethodField()
     learning_mode_gwa = serializers.SerializerMethodField()
     learning_mode_detailed_grades = serializers.SerializerMethodField()
+    thesis_gwa = serializers.SerializerMethodField()
+    complete_gwa = serializers.SerializerMethodField()
+    thesis_status = serializers.SerializerMethodField()
+    total_xp = serializers.SerializerMethodField()
+    achievements_count = serializers.SerializerMethodField()
 
     class Meta:
         model = User
         fields = ['id', 'username', 'email', 'date_joined',
                   'story_progress', 'challenges_completed', 'learning_modules_completed',
-                  'ch1_quiz_score', 'ch1_did_remedial', 'ch1_remedial_score', 'detailed_grades', 'story_mode_gwa', 'learning_mode_gwa', 'learning_mode_detailed_grades']
+                  'ch1_quiz_score', 'ch1_did_remedial', 'ch1_remedial_score', 'detailed_grades',
+                  'story_mode_gwa', 'learning_mode_gwa', 'learning_mode_detailed_grades',
+                  'thesis_gwa', 'complete_gwa', 'thesis_status',
+                  'total_xp', 'achievements_count']
         read_only_fields = fields
 
     def get_story_progress(self, obj) -> float:
@@ -127,6 +135,26 @@ class StudentSerializer(serializers.ModelSerializer):
                 
                 payload.append(prof_data)
                 
+            # --- Panelist grades ---
+            panelists = [
+                ("Panelist 1 \u2014 Setup", "thesis_panelist_1"),
+                ("Panelist 2 \u2014 Logic", "thesis_panelist_2"),
+                ("Panelist 3 \u2014 Full Stack", "thesis_panelist_3"),
+            ]
+            for name, prefix in panelists:
+                grade = sd.get(f"{prefix}_grade", 0.0)
+                try:
+                    grade_f = float(grade)
+                except (ValueError, TypeError):
+                    grade_f = 0.0
+                retakes = sd.get(f"{prefix}_retakes", 0)
+                payload.append({
+                    "professor": name,
+                    "grade": grade_f if grade_f > 0.0 else "Not Attempted",
+                    "retakes": retakes if grade_f > 0.0 else "Not Attempted",
+                    "removal_exam": "N/A"
+                })
+                
             return payload
         except GameSave.DoesNotExist:
             payload = []
@@ -136,6 +164,13 @@ class StudentSerializer(serializers.ModelSerializer):
                     "grade": "Not Attempted",
                     "retakes": "Not Attempted",
                     "removal_exam": "Not Attempted"
+                })
+            for name, _ in [("Panelist 1 \u2014 Setup", ""), ("Panelist 2 \u2014 Logic", ""), ("Panelist 3 \u2014 Full Stack", "")]:
+                payload.append({
+                    "professor": name,
+                    "grade": "Not Attempted",
+                    "retakes": "Not Attempted",
+                    "removal_exam": "N/A"
                 })
             return payload
 
@@ -202,6 +237,55 @@ class StudentSerializer(serializers.ModelSerializer):
             return payload
         except GameSave.DoesNotExist:
             return []
+
+    def get_thesis_gwa(self, obj) -> float:
+        """Average of the 3 panelist grades."""
+        try:
+            sd = obj.game_save.save_data
+            if not isinstance(sd, dict): return 0.0
+            panelist_prefixes = ["thesis_panelist_1", "thesis_panelist_2", "thesis_panelist_3"]
+            total = 0.0
+            count = 0
+            for prefix in panelist_prefixes:
+                grade = sd.get(f"{prefix}_grade", 0.0)
+                try:
+                    f_val = float(grade)
+                    if f_val > 0.0:
+                        total += f_val
+                        count += 1
+                except (ValueError, TypeError):
+                    continue
+            return round(total / count, 2) if count > 0 else 0.0
+        except GameSave.DoesNotExist:
+            return 0.0
+
+    def get_complete_gwa(self, obj) -> float:
+        """Average of story_mode_gwa and thesis_gwa (both must be > 0)."""
+        story_gwa = self.get_story_mode_gwa(obj)
+        thesis_gwa = self.get_thesis_gwa(obj)
+        values = [v for v in [story_gwa, thesis_gwa] if v > 0]
+        return round(sum(values) / len(values), 2) if values else 0.0
+
+    def get_thesis_status(self, obj) -> dict:
+        try:
+            sd = obj.game_save.save_data
+            if not isinstance(sd, dict): sd = {}
+            return {
+                "progress": sd.get("thesis_panelist_progress", 0),
+                "completed": sd.get("thesis_completed", False),
+                "completed_at": sd.get("thesis_completed_at", ""),
+            }
+        except GameSave.DoesNotExist:
+            return {"progress": 0, "completed": False, "completed_at": ""}
+
+    def get_total_xp(self, obj) -> int:
+        try:
+            return obj.profile.total_xp
+        except Profile.DoesNotExist:
+            return 0
+
+    def get_achievements_count(self, obj) -> int:
+        return UserAchievement.objects.filter(user=obj).count()
 
 
 class ClassroomSerializer(serializers.ModelSerializer):

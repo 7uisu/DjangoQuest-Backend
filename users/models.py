@@ -37,8 +37,8 @@ class User(AbstractUser):
     email = models.EmailField(unique=True)
     username = models.CharField(max_length=150, unique=True)
     is_verified = models.BooleanField(default=False)
-    is_teacher = models.BooleanField(default=False)
-    is_student = models.BooleanField(default=True)
+    is_teacher = models.BooleanField(default=False, db_index=True)  # indexed: filter teachers fast
+    is_student = models.BooleanField(default=True, db_index=True)   # indexed: filter students fast
     date_joined = models.DateTimeField(auto_now_add=True)
     
     objects = UserManager()
@@ -119,6 +119,7 @@ class Profile(models.Model):
         null=True,
         blank=True,
         related_name='students',
+        db_index=True,  # indexed: "students in classroom X" queries are O(log n)
         help_text='The classroom this student is enrolled in.',
     )
 
@@ -139,6 +140,7 @@ class Profile(models.Model):
 
 
 class Achievement(models.Model):
+    key = models.CharField(max_length=50, unique=True, help_text="Programmatic key, e.g. 'ch1_complete'")
     name = models.CharField(max_length=100)
     description = models.TextField()
     xp_reward = models.IntegerField(default=100)

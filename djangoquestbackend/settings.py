@@ -83,14 +83,29 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
     ],
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle',
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '30/minute',
+        'user': '120/minute', # Not strictly used here but good practice
+    },
+    # Pagination: never send the full table to the browser.
+    # Each list endpoint returns max 50 rows + a `next` URL for the next page.
+    # Views that must bypass pagination (e.g. CSV exports) call
+    # self.pagination_class = None explicitly.
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 50,
 }
 
 # JWT Settings
 SIMPLE_JWT = {
-    # Extended for game "remember-me" — Godot saves the token locally
-    'ACCESS_TOKEN_LIFETIME': timedelta(days=7),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=30),
-    'ROTATE_REFRESH_TOKENS': False,
+    # Tightened lifetimes for security — short access, moderate refresh
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=15),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+    # Rotate refresh tokens: each refresh invalidates the old token
+    'ROTATE_REFRESH_TOKENS': True,
     'BLACKLIST_AFTER_ROTATION': True,
     'TOKEN_BLACKLIST': True,
     'UPDATE_LAST_LOGIN': False,

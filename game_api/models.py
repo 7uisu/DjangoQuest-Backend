@@ -28,6 +28,10 @@ class GameSave(models.Model):
     ch1_did_remedial = models.BooleanField(default=False)
     ch1_remedial_score = models.IntegerField(default=0)
 
+    # Thesis Defense
+    thesis_panelist_progress = models.IntegerField(default=0)  # 0-3
+    thesis_completed = models.BooleanField(default=False)
+
     def __str__(self):
         return f"{self.user.username}'s Save ({self.updated_at:%Y-%m-%d %H:%M})"
 
@@ -57,7 +61,9 @@ class GameSave(models.Model):
             'ch2_y3s2_teaching_done',
             'ch2_y3mid_teaching_done',
         ]
-        all_flags = ch1_flags + ch2_flags
+        # Thesis milestone
+        thesis_flags = ['thesis_completed']
+        all_flags = ch1_flags + ch2_flags + thesis_flags
         total = len(all_flags)
         done = sum(1 for f in all_flags if save_data.get(f, False))
         story_pct = round((done / total) * 100, 1) if total > 0 else 0.0
@@ -78,6 +84,10 @@ class GameSave(models.Model):
         defeated_npcs_list = save_data.get('defeated_challenge_npcs', [])
         defeated_npcs = len(defeated_npcs_list) if isinstance(defeated_npcs_list, list) else 0
 
+        # ── Thesis Defense ──
+        thesis_panelist_progress = int(save_data.get('thesis_panelist_progress', 0))
+        thesis_completed = bool(save_data.get('thesis_completed', False))
+
         return {
             'story_progress_percent': story_pct,
             'challenges_completed': challenges,
@@ -87,4 +97,6 @@ class GameSave(models.Model):
             'ch1_quiz_score': ch1_quiz_score,
             'ch1_did_remedial': ch1_did_remedial,
             'ch1_remedial_score': ch1_remedial_score,
+            'thesis_panelist_progress': thesis_panelist_progress,
+            'thesis_completed': thesis_completed,
         }

@@ -6,6 +6,7 @@ from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAdminUser
+from rest_framework.pagination import PageNumberPagination
 from django.contrib.auth import get_user_model
 from django.db.models import Q, Avg, Count
 from django.http import HttpResponse
@@ -105,11 +106,13 @@ class AdminUserListView(APIView):
                 Q(last_name__icontains=search) |
                 Q(username__icontains=search)
             )
-        users = qs.values(
+        qs = qs.values(
             'id', 'email', 'username', 'first_name', 'last_name',
             'is_student', 'is_teacher', 'is_staff', 'is_active', 'date_joined'
         )
-        return Response(list(users))
+        paginator = PageNumberPagination()
+        page = paginator.paginate_queryset(qs, request)
+        return paginator.get_paginated_response(list(page))
 
     def post(self, request):
         email = request.data.get('email', '').strip()
@@ -248,6 +251,7 @@ class AdminClassroomListView(APIView):
         classrooms = Classroom.objects.select_related('teacher').annotate(
             feedback_count=Count('feedbacks'),
             announcement_count=Count('announcements'),
+            student_count=Count('students'),
         ).all()
         data = [
             {
@@ -257,13 +261,15 @@ class AdminClassroomListView(APIView):
                 'teacher_email': c.teacher.email,
                 'teacher_name': f"{c.teacher.first_name} {c.teacher.last_name}".strip() or c.teacher.username,
                 'teacher_id': c.teacher.id,
-                'student_count': c.students.count(),
+                'student_count': c.student_count,
                 'feedback_count': c.feedback_count,
                 'announcement_count': c.announcement_count,
             }
             for c in classrooms
         ]
-        return Response(data)
+        paginator = PageNumberPagination()
+        page = paginator.paginate_queryset(data, request)
+        return paginator.get_paginated_response(page)
 
 
 class AdminClassroomDetailView(APIView):
@@ -403,9 +409,9 @@ class AdminClassroomExportView(APIView):
         response['Content-Disposition'] = 'attachment; filename="classrooms_export.csv"'
         writer = csv.writer(response)
         writer.writerow(['ID', 'Name', 'Enrollment Code', 'Teacher Email', 'Student Count', 'Created At'])
-        for c in Classroom.objects.select_related('teacher').all():
+        for c in Classroom.objects.select_related('teacher').annotate(student_count=Count('students')).all():
             writer.writerow([c.id, c.name, c.enrollment_code, c.teacher.email,
-                             c.students.count(), c.created_at.strftime('%Y-%m-%d')])
+                             c.student_count, c.created_at.strftime('%Y-%m-%d')])
         log_action(request.user, 'Exported classrooms CSV', 'classroom')
         return response
 
@@ -443,7 +449,9 @@ class AdminFeedbackListView(APIView):
                 pass
 
         serializer = FeedbackListSerializer(qs, many=True)
-        return Response(serializer.data)
+        paginator = PageNumberPagination()
+        page = paginator.paginate_queryset(serializer.data, request)
+        return paginator.get_paginated_response(page)
 
 
 class AdminFeedbackDeleteView(APIView):

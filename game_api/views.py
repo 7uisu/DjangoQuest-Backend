@@ -170,11 +170,148 @@ class GameSaveView(APIView):
     """
     permission_classes = [permissions.IsAuthenticated]
 
+    # ── Allowed save_data keys and their type validators ──
+    ALLOWED_KEYS = {
+        # Booleans – chapter flags
+        'ch1_teaching_done', 'ch1_quiz_done', 'ch1_post_quiz_dialogue_done',
+        'ch1_convenience_store_cutscene_done', 'ch1_spaghetti_guy_cutscene_done',
+        'ch1_did_remedial',
+        'ch2_y1s1_teaching_done', 'ch2_y1s2_teaching_done',
+        'ch2_y2s1_teaching_done', 'ch2_y2s2_teaching_done',
+        'ch2_y3s1_teaching_done', 'ch2_y3s2_teaching_done',
+        'ch2_y3mid_teaching_done',
+        'thesis_completed', 'used_item_in_college',
+        # Integers
+        'ch1_quiz_score', 'ch1_remedial_score', 'challenges_completed',
+        'credits', 'thesis_panelist_progress',
+        # Floats – professor grades
+        'ch2_y1s1_final_grade', 'ch2_y1s2_final_grade',
+        'ch2_y2s1_final_grade', 'ch2_y2s2_final_grade',
+        'ch2_y3s1_final_grade', 'ch2_y3s2_final_grade',
+        'ch2_y3mid_final_grade',
+        # Thesis panelist grades
+        'thesis_panelist_1_grade', 'thesis_panelist_2_grade', 'thesis_panelist_3_grade',
+        # Retake counts (int)
+        'ch2_y1s1_retake_count', 'ch2_y1s2_retake_count',
+        'ch2_y2s1_retake_count', 'ch2_y2s2_retake_count',
+        'ch2_y3s1_retake_count', 'ch2_y3s2_retake_count',
+        'ch2_y3mid_retake_count',
+        # Removal flags
+        'ch2_y1s1_removal_passed', 'ch2_y1s2_removal_passed',
+        'ch2_y2s1_removal_passed', 'ch2_y2s2_removal_passed',
+        'ch2_y3s1_removal_passed', 'ch2_y3s2_removal_passed',
+        'ch2_y3mid_removal_passed',
+        # Lists
+        'defeated_challenge_npcs', 'unlocked_achievements',
+        # Dicts
+        'student_seq_progress',
+        # AI minigame data (per-professor dicts)
+        'ch2_y1s1_ai_data', 'ch2_y1s2_ai_data',
+        'ch2_y2s1_ai_data', 'ch2_y2s2_ai_data',
+        'ch2_y3s1_ai_data', 'ch2_y3s2_ai_data',
+        'ch2_y3mid_ai_data',
+        # Learning mode data
+        'learning_mode_grades',
+    }
+
+    # Valid Philippine grade scale values (1.0 - 5.0)
+    VALID_GRADES = {1.0, 1.25, 1.5, 1.75, 2.0, 2.25, 2.5, 2.75, 3.0, 5.0}
+
+    @staticmethod
+    def _validate_save_data(save_data: dict) -> list[str]:
+        """Validate save_data fields. Returns list of error messages."""
+        errors = []
+
+        # 1. Strip unknown keys (don't reject, just ignore)
+        unknown = set(save_data.keys()) - GameSaveView.ALLOWED_KEYS
+        for key in unknown:
+            save_data.pop(key, None)
+
+        # 2. Validate quiz scores (0–5)
+        for key in ('ch1_quiz_score', 'ch1_remedial_score'):
+            val = save_data.get(key)
+            if val is not None:
+                try:
+                    val = int(val)
+                    if not (0 <= val <= 5):
+                        errors.append(f'{key} must be between 0 and 5.')
+                except (ValueError, TypeError):
+                    errors.append(f'{key} must be an integer.')
+
+        # 3. Validate grades (Philippine grading: 1.0 to 5.0)
+        grade_keys = [k for k in save_data if k.endswith('_final_grade') or k.endswith('_grade')]
+        for key in grade_keys:
+            val = save_data.get(key)
+            if val is not None:
+                try:
+                    val = float(val)
+                    if val != 0 and val not in GameSaveView.VALID_GRADES:
+                        errors.append(f'{key} has invalid grade value: {val}.')
+                except (ValueError, TypeError):
+                    errors.append(f'{key} must be a number.')
+
+        # 4. Validate credits range (0–9999)
+        credits_val = save_data.get('credits')
+        if credits_val is not None:
+            try:
+                credits_val = int(credits_val)
+                if not (0 <= credits_val <= 9999):
+                    errors.append('credits must be between 0 and 9999.')
+            except (ValueError, TypeError):
+                errors.append('credits must be an integer.')
+
+        # 5. Validate challenges_completed (0–100)
+        cc = save_data.get('challenges_completed')
+        if cc is not None:
+            try:
+                cc = int(cc)
+                if not (0 <= cc <= 100):
+                    errors.append('challenges_completed must be between 0 and 100.')
+            except (ValueError, TypeError):
+                errors.append('challenges_completed must be an integer.')
+
+        # 6. Validate thesis progress (0–3)
+        tp = save_data.get('thesis_panelist_progress')
+        if tp is not None:
+            try:
+                tp = int(tp)
+                if not (0 <= tp <= 3):
+                    errors.append('thesis_panelist_progress must be between 0 and 3.')
+            except (ValueError, TypeError):
+                errors.append('thesis_panelist_progress must be an integer.')
+
+        # 7. Validate retake counts (0–10)
+        for key in [k for k in save_data if k.endswith('_retake_count')]:
+            val = save_data.get(key)
+            if val is not None:
+                try:
+                    val = int(val)
+                    if not (0 <= val <= 10):
+                        errors.append(f'{key} must be between 0 and 10.')
+                except (ValueError, TypeError):
+                    errors.append(f'{key} must be an integer.')
+
+        # 8. Lists must actually be lists
+        for key in ('defeated_challenge_npcs', 'unlocked_achievements'):
+            val = save_data.get(key)
+            if val is not None and not isinstance(val, list):
+                errors.append(f'{key} must be a list.')
+
+        return errors
+
     def put(self, request):
         save_data = request.data.get('save_data')
         if save_data is None or not isinstance(save_data, dict):
             return Response(
                 {'detail': 'save_data (JSON object) is required.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # ── Server-side validation ──
+        validation_errors = self._validate_save_data(save_data)
+        if validation_errors:
+            return Response(
+                {'detail': 'Save data validation failed.', 'errors': validation_errors},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -188,10 +325,16 @@ class GameSaveView(APIView):
             },
         )
 
+        # Auto-check achievements on every save upload
+        from .achievement_engine import check_achievements
+        newly_unlocked = check_achievements(request.user, save_data)
+
         return Response({
             'detail': 'Save uploaded successfully.',
             'updated_at': game_save.updated_at.isoformat(),
+            'new_achievements': newly_unlocked,
         }, status=status.HTTP_200_OK)
+
 
     def get(self, request):
         try:
@@ -242,6 +385,9 @@ class GameCheckCodeView(APIView):
     }
     """
     permission_classes = [permissions.AllowAny]  # Allow offline/anonymous play
+    
+    from rest_framework.throttling import AnonRateThrottle
+    throttle_classes = [AnonRateThrottle]
 
     def post(self, request):
         print(f"\n[check-code] ========== REQUEST RECEIVED ==========")
@@ -587,6 +733,9 @@ class GameAIEvaluatorView(APIView):
     }
     """
     permission_classes = [permissions.AllowAny]
+    
+    from rest_framework.throttling import AnonRateThrottle
+    throttle_classes = [AnonRateThrottle]
 
     def post(self, request):
         challenge_type = request.data.get('challenge_type', 'general')
