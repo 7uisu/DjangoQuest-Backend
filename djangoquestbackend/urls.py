@@ -14,6 +14,7 @@ urlpatterns = [
     path('api/admin/', include('users.admin_urls')),
     path('api/feedback/', include('feedback.urls')),
     path('api/announcements/', include('announcements.urls')),
+    path('api/patchnotes/', include('patchnotes.urls')),
     path('', include('dashboard.urls')),
 ]
 

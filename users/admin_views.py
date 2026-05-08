@@ -16,6 +16,8 @@ from feedback.models import Feedback
 from feedback.serializers import FeedbackListSerializer
 from announcements.models import Announcement
 from announcements.serializers import AnnouncementReadSerializer
+from patchnotes.models import PatchNote, DownloadLink
+from patchnotes.serializers import PatchNoteSerializer, DownloadLinkSerializer
 
 User = get_user_model()
 
@@ -611,3 +613,103 @@ class AdminInviteCodeView(APIView):
         log_action(request.user, 'delete', 'invite_code', obj.id, f'Deleted invite code {obj.code}')
         obj.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  PATCH NOTES
+# ═══════════════════════════════════════════════════════════════════════════════
+class AdminPatchNoteListView(APIView):
+    """
+    GET  /api/admin/patchnotes/   — List all patch notes.
+    POST /api/admin/patchnotes/   — Create a new patch note.
+    """
+    permission_classes = [IsAdminUser]
+
+    def get(self, request):
+        qs = PatchNote.objects.all()
+        serializer = PatchNoteSerializer(qs, many=True)
+        return Response(serializer.data)
+
+    def post(self, request):
+        serializer = PatchNoteSerializer(data=request.data)
+        if serializer.is_valid():
+            pn = serializer.save()
+            log_action(request.user, f'Created patch note v{pn.version}', 'patchnote', pn.id)
+
+            # Auto-create a platform announcement for the new patch note
+            Announcement.objects.create(
+                author=request.user,
+                announcement_type='platform',
+                title=f'Patch v{pn.version} — {pn.title}',
+                body=f'A new update has been released! Check the Patch Notes page for full details on what changed in v{pn.version}.',
+            )
+
+            return Response(PatchNoteSerializer(pn).data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class AdminPatchNoteDetailView(APIView):
+    """
+    PATCH  /api/admin/patchnotes/<id>/  — Edit a patch note.
+    DELETE /api/admin/patchnotes/<id>/  — Delete a patch note.
+    """
+    permission_classes = [IsAdminUser]
+
+    def patch(self, request, pk):
+        try:
+            pn = PatchNote.objects.get(pk=pk)
+        except PatchNote.DoesNotExist:
+            return Response({'detail': 'Patch note not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = PatchNoteSerializer(pn, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            log_action(request.user, f'Edited patch note v{pn.version}', 'patchnote', pn.id)
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk):
+        try:
+            pn = PatchNote.objects.get(pk=pk)
+        except PatchNote.DoesNotExist:
+            return Response({'detail': 'Patch note not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        version = pn.version
+        pn.delete()
+        log_action(request.user, f'Deleted patch note v{version}', 'patchnote', pk)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  DOWNLOAD LINKS
+# ═══════════════════════════════════════════════════════════════════════════════
+class AdminDownloadLinkView(APIView):
+    """
+    GET  /api/admin/download-links/   — List all download links.
+    POST /api/admin/download-links/   — Create or update a download link.
+    """
+    permission_classes = [IsAdminUser]
+
+    def get(self, request):
+        qs = DownloadLink.objects.all()
+        serializer = DownloadLinkSerializer(qs, many=True)
+        return Response(serializer.data)
+
+    def post(self, request):
+        platform = request.data.get('platform', '').strip()
+        url = request.data.get('url', '').strip()
+        if platform not in ('windows', 'macos'):
+            return Response({'detail': 'Platform must be "windows" or "macos".'},
+                            status=status.HTTP_400_BAD_REQUEST)
+        if not url:
+            return Response({'detail': 'URL is required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        obj, created = DownloadLink.objects.update_or_create(
+            platform=platform,
+            defaults={'url': url},
+        )
+        action = 'Created' if created else 'Updated'
+        log_action(request.user, f'{action} {platform} download link', 'download_link', obj.id)
+        return Response(DownloadLinkSerializer(obj).data,
+                        status=status.HTTP_201_CREATED if created else status.HTTP_200_OK)
+

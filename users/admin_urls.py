@@ -18,10 +18,12 @@ from .admin_views import (
     AdminAnnouncementDetailView,
     AdminAuditLogView,
     AdminInviteCodeView,
+    AdminPatchNoteListView,
+    AdminPatchNoteDetailView,
+    AdminDownloadLinkView,
 )
 
 from app.admin_views import (
-
     AdminVideoTutorialListView,
     AdminVideoTutorialDetailView,
     AdminVideoStepListView,
@@ -59,7 +61,12 @@ urlpatterns = [
     # Settings
     path('invite-codes/', AdminInviteCodeView.as_view(), name='admin_invite_codes'),
 
+    # Patch Notes
+    path('patchnotes/', AdminPatchNoteListView.as_view(), name='admin_patchnotes'),
+    path('patchnotes/<int:pk>/', AdminPatchNoteDetailView.as_view(), name='admin_patchnote_detail'),
 
+    # Download Links
+    path('download-links/', AdminDownloadLinkView.as_view(), name='admin_download_links'),
 
     # Video Tutorials
     path('video-tutorials/', AdminVideoTutorialListView.as_view()),
