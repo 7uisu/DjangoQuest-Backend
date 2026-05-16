@@ -151,6 +151,15 @@ class GameSaveTest(TestCase):
         token = resp.json()['access']
         self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {token}')
 
+    def _ch1_complete_payload(self):
+        return {
+            'ch1_teaching_done': True,
+            'ch1_quiz_done': True,
+            'ch1_post_quiz_dialogue_done': True,
+            'ch1_convenience_store_cutscene_done': True,
+            'ch1_spaghetti_guy_cutscene_done': True,
+        }
+
     # ── PUT ──────────────────────────────────────────────────────────
 
     def test_save_game_success(self):
@@ -229,7 +238,9 @@ class GameSaveTest(TestCase):
                 'ch1_convenience_store_cutscene_done': True,
                 'ch1_spaghetti_guy_cutscene_done': True,
                 'ch2_y1s1_teaching_done': True,
+                'ch2_y1s1_final_grade': 1.5,
                 'ch2_y1s2_teaching_done': True,
+                'ch2_y1s2_final_grade': 2.0,
                 # rest are False/missing
                 'challenges_completed': 12,
             },
@@ -240,3 +251,60 @@ class GameSaveTest(TestCase):
         self.assertAlmostEqual(data['story_progress_percent'], 58.3, places=1)
         self.assertEqual(data['challenges_completed'], 12)
         self.assertEqual(data['learning_modules_completed'], 2)
+
+    def test_reject_skipped_story_milestone(self):
+        """A save cannot mark later story milestones done while earlier ones are missing."""
+        self._login()
+        resp = self.client.put(self.url, {
+            'save_data': {
+                'ch1_quiz_done': True,
+            },
+        }, format='json')
+        self.assertEqual(resp.status_code, 400)
+        self.assertIn('ch1_quiz_done', ' '.join(resp.json()['errors']))
+
+    def test_reject_completed_professor_without_passing_grade(self):
+        """Chapter 2 professor completion must include a passing final grade."""
+        self._login()
+        payload = self._ch1_complete_payload()
+        payload.update({
+            'ch2_y1s1_teaching_done': True,
+            'ch2_y1s1_final_grade': 4.0,
+        })
+        resp = self.client.put(self.url, {'save_data': payload}, format='json')
+        self.assertEqual(resp.status_code, 400)
+        self.assertIn('passing ch2_y1s1_final_grade', ' '.join(resp.json()['errors']))
+
+    def test_reject_regressing_synced_progress(self):
+        """Already synced completion flags and counters cannot move backwards."""
+        self._login()
+        payload = self._ch1_complete_payload()
+        payload['challenges_completed'] = 5
+        self.client.put(self.url, {'save_data': payload}, format='json')
+
+        regressed_payload = payload.copy()
+        regressed_payload['ch1_quiz_done'] = False
+        regressed_payload['challenges_completed'] = 4
+        resp = self.client.put(self.url, {'save_data': regressed_payload}, format='json')
+
+        self.assertEqual(resp.status_code, 400)
+        errors = ' '.join(resp.json()['errors'])
+        self.assertIn('ch1_quiz_done cannot be changed', errors)
+        self.assertIn('challenges_completed cannot decrease', errors)
+
+    def test_reject_professor_grade_improvement_after_sync(self):
+        """Story-mode professor grades cannot be improved after that module is synced."""
+        self._login()
+        payload = self._ch1_complete_payload()
+        payload.update({
+            'ch2_y1s1_teaching_done': True,
+            'ch2_y1s1_final_grade': 2.0,
+        })
+        self.client.put(self.url, {'save_data': payload}, format='json')
+
+        improved_payload = payload.copy()
+        improved_payload['ch2_y1s1_final_grade'] = 1.0
+        resp = self.client.put(self.url, {'save_data': improved_payload}, format='json')
+
+        self.assertEqual(resp.status_code, 400)
+        self.assertIn('ch2_y1s1_final_grade cannot improve', ' '.join(resp.json()['errors']))

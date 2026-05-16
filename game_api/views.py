@@ -172,6 +172,16 @@ class GameSaveView(APIView):
 
     # ── Allowed save_data keys and their type validators ──
     ALLOWED_KEYS = {
+        # Basic identity / restore metadata
+        'player_name', 'selected_gender', 'api_username',
+        'current_scene_path', 'timestamp', 'tracked_quest_id',
+        'player_x', 'player_y',
+        # Tutorials / world state
+        'has_seen_tutorial', 'has_seen_learning_mode_intro',
+        'has_seen_controls_tutorial', 'has_seen_inventory_tutorial',
+        'has_seen_laptop_tutorial', 'has_seen_ide_tutorial',
+        'has_seen_college_sis_tutorial', 'has_seen_overflow_stack_tutorial',
+        'has_seen_shop_tutorial', 'has_reached_college',
         # Booleans – chapter flags
         'ch1_teaching_done', 'ch1_quiz_done', 'ch1_post_quiz_dialogue_done',
         'ch1_convenience_store_cutscene_done', 'ch1_spaghetti_guy_cutscene_done',
@@ -181,6 +191,16 @@ class GameSaveView(APIView):
         'ch2_y3s1_teaching_done', 'ch2_y3s2_teaching_done',
         'ch2_y3mid_teaching_done',
         'thesis_completed', 'used_item_in_college',
+        'thesis_spotlight_shown',
+        # Chapter 2 timestamps / module checkpoints
+        'ch2_y1s1_teaching_done_at', 'ch2_y1s2_teaching_done_at',
+        'ch2_y2s1_teaching_done_at', 'ch2_y2s2_teaching_done_at',
+        'ch2_y3s1_teaching_done_at', 'ch2_y3s2_teaching_done_at',
+        'ch2_y3mid_teaching_done_at', 'thesis_completed_at',
+        'ch2_y1s1_current_module', 'ch2_y1s2_current_module',
+        'ch2_y2s1_current_module', 'ch2_y2s2_current_module',
+        'ch2_y3s1_current_module', 'ch2_y3s2_current_module',
+        'ch2_y3mid_current_module',
         # Integers
         'ch1_quiz_score', 'ch1_remedial_score', 'challenges_completed',
         'credits', 'thesis_panelist_progress',
@@ -196,26 +216,106 @@ class GameSaveView(APIView):
         'ch2_y2s1_retake_count', 'ch2_y2s2_retake_count',
         'ch2_y3s1_retake_count', 'ch2_y3s2_retake_count',
         'ch2_y3mid_retake_count',
+        'ch2_y1s1_wrong_attempts', 'ch2_y1s2_wrong_attempts',
+        'ch2_y2s1_wrong_attempts', 'ch2_y2s2_wrong_attempts',
+        'ch2_y3s1_wrong_attempts', 'ch2_y3s2_wrong_attempts',
+        'ch2_y3mid_wrong_attempts',
+        'ch2_y1s1_hints_used', 'ch2_y1s2_hints_used',
+        'ch2_y2s1_hints_used', 'ch2_y2s2_hints_used',
+        'ch2_y3s1_hints_used', 'ch2_y3s2_hints_used',
+        'ch2_y3mid_hints_used',
+        'thesis_panelist_1_retakes', 'thesis_panelist_2_retakes',
+        'thesis_panelist_3_retakes',
         # Removal flags
         'ch2_y1s1_removal_passed', 'ch2_y1s2_removal_passed',
         'ch2_y2s1_removal_passed', 'ch2_y2s2_removal_passed',
         'ch2_y3s1_removal_passed', 'ch2_y3s2_removal_passed',
         'ch2_y3mid_removal_passed',
+        # Professor reward / status flags
+        'ch2_y1s1_bonus_item_earned', 'ch2_y1s2_bonus_item_earned',
+        'ch2_y2s1_bonus_item_earned', 'ch2_y2s2_bonus_item_earned',
+        'ch2_y3s1_bonus_item_earned', 'ch2_y3s2_bonus_item_earned',
+        'ch2_y3mid_bonus_item_earned',
+        'ch2_y1s1_inc_triggered', 'ch2_y1s2_inc_triggered',
+        'ch2_y2s1_inc_triggered', 'ch2_y2s2_inc_triggered',
+        'ch2_y3s1_inc_triggered', 'ch2_y3s2_inc_triggered',
+        'ch2_y3mid_inc_triggered',
+        # AI/offline minigame flags
+        'ch2_y2s2_ai_oto_skipped', 'ch2_y2s2_ai_otm_skipped',
+        'ch2_y2s2_ai_mtm_skipped', 'ch2_y2s2_ai_fully_offline',
+        'ch2_y1s2_ai_data_types_skipped', 'ch2_y1s2_ai_fully_offline',
+        'ch2_y2s1_ai_url_routing_skipped', 'ch2_y2s1_ai_fully_offline',
+        'ch2_y3s2_ai_auth_checker_skipped', 'ch2_y3s2_ai_fully_offline',
+        'ch2_y3mid_ai_http_verbs_skipped', 'ch2_y3mid_ai_fully_offline',
+        # Unlocks
+        'unlocked_level_1', 'unlocked_level_2', 'unlocked_level_3', 'unlocked_level_4',
+        'unlocked_book_and_minigame_1', 'unlocked_book_and_minigame_2',
+        'unlocked_book_and_minigame_3', 'unlocked_book_and_minigame_4',
         # Lists
-        'defeated_challenge_npcs', 'unlocked_achievements',
+        'defeated_challenge_npcs', 'unlocked_achievements', 'picked_up_items',
+        'student_seq_active_npcs', 'student_seq_names',
+        'student_seq_completed_indices', 'inventory',
         # Dicts
-        'student_seq_progress',
+        'student_seq_progress', 'student_retakes',
         # AI minigame data (per-professor dicts)
         'ch2_y1s1_ai_data', 'ch2_y1s2_ai_data',
         'ch2_y2s1_ai_data', 'ch2_y2s2_ai_data',
         'ch2_y3s1_ai_data', 'ch2_y3s2_ai_data',
         'ch2_y3mid_ai_data',
+        # Student sequence scalar state
+        'student_seq_active_professor', 'student_seq_miniboss_npc',
         # Learning mode data
         'learning_mode_grades',
     }
 
-    # Valid Philippine grade scale values (1.0 - 5.0)
-    VALID_GRADES = {1.0, 1.25, 1.5, 1.75, 2.0, 2.25, 2.5, 2.75, 3.0, 5.0}
+    # Valid Philippine grade scale values. 4.0 is INC, valid to sync but not passing.
+    VALID_GRADES = {1.0, 1.25, 1.5, 1.75, 2.0, 2.25, 2.5, 2.75, 3.0, 4.0, 5.0}
+    PASSING_GRADES = {1.0, 1.25, 1.5, 1.75, 2.0, 2.25, 2.5, 2.75, 3.0}
+    STORY_MILESTONES = [
+        'ch1_teaching_done',
+        'ch1_quiz_done',
+        'ch1_post_quiz_dialogue_done',
+        'ch1_convenience_store_cutscene_done',
+        'ch1_spaghetti_guy_cutscene_done',
+        'ch2_y1s1_teaching_done',
+        'ch2_y1s2_teaching_done',
+        'ch2_y2s1_teaching_done',
+        'ch2_y2s2_teaching_done',
+        'ch2_y3s1_teaching_done',
+        'ch2_y3s2_teaching_done',
+        'ch2_y3mid_teaching_done',
+        'thesis_completed',
+    ]
+    PROFESSOR_PREFIXES = [
+        'ch2_y1s1',
+        'ch2_y1s2',
+        'ch2_y2s1',
+        'ch2_y2s2',
+        'ch2_y3s1',
+        'ch2_y3s2',
+        'ch2_y3mid',
+    ]
+    LIST_KEYS = {
+        'defeated_challenge_npcs',
+        'unlocked_achievements',
+        'picked_up_items',
+        'student_seq_active_npcs',
+        'student_seq_names',
+        'student_seq_completed_indices',
+        'inventory',
+    }
+    DICT_KEYS = {
+        'student_seq_progress',
+        'student_retakes',
+        'learning_mode_grades',
+        'ch2_y1s1_ai_data',
+        'ch2_y1s2_ai_data',
+        'ch2_y2s1_ai_data',
+        'ch2_y2s2_ai_data',
+        'ch2_y3s1_ai_data',
+        'ch2_y3s2_ai_data',
+        'ch2_y3mid_ai_data',
+    }
 
     @staticmethod
     def _validate_save_data(save_data: dict) -> list[str]:
@@ -281,7 +381,11 @@ class GameSaveView(APIView):
                 errors.append('thesis_panelist_progress must be an integer.')
 
         # 7. Validate retake counts (0–10)
-        for key in [k for k in save_data if k.endswith('_retake_count')]:
+        retake_keys = [
+            k for k in save_data
+            if k.endswith('_retake_count') or k.endswith('_retakes')
+        ]
+        for key in retake_keys:
             val = save_data.get(key)
             if val is not None:
                 try:
@@ -291,11 +395,161 @@ class GameSaveView(APIView):
                 except (ValueError, TypeError):
                     errors.append(f'{key} must be an integer.')
 
-        # 8. Lists must actually be lists
-        for key in ('defeated_challenge_npcs', 'unlocked_achievements'):
+        # 8. Current module checkpoints should stay in a small sane range.
+        for key in [k for k in save_data if k.endswith('_current_module')]:
+            val = save_data.get(key)
+            if val is not None:
+                try:
+                    val = int(val)
+                    if not (0 <= val <= 10):
+                        errors.append(f'{key} must be between 0 and 10.')
+                except (ValueError, TypeError):
+                    errors.append(f'{key} must be an integer.')
+
+        # 9. Attempts and hint counters should stay in a sane range.
+        counter_keys = [
+            k for k in save_data
+            if k.endswith('_wrong_attempts') or k.endswith('_hints_used')
+        ]
+        for key in counter_keys:
+            val = save_data.get(key)
+            if val is not None:
+                try:
+                    val = int(val)
+                    if not (0 <= val <= 999):
+                        errors.append(f'{key} must be between 0 and 999.')
+                except (ValueError, TypeError):
+                    errors.append(f'{key} must be an integer.')
+
+        # 10. Lists must actually be lists
+        for key in GameSaveView.LIST_KEYS:
             val = save_data.get(key)
             if val is not None and not isinstance(val, list):
                 errors.append(f'{key} must be a list.')
+
+        # 11. Dict-like payloads must actually be objects.
+        for key in GameSaveView.DICT_KEYS:
+            val = save_data.get(key)
+            if val is not None and not isinstance(val, dict):
+                errors.append(f'{key} must be an object.')
+
+        # 12. Validate nested learning mode grades
+        learning_grades = save_data.get('learning_mode_grades')
+        if isinstance(learning_grades, dict):
+            for key, value in learning_grades.items():
+                try:
+                    grade = float(value)
+                    if grade not in GameSaveView.VALID_GRADES:
+                        errors.append(f'learning_mode_grades.{key} has invalid grade value: {grade}.')
+                except (ValueError, TypeError):
+                    errors.append(f'learning_mode_grades.{key} must be a number.')
+
+        return errors
+
+    @staticmethod
+    def _validate_progress_transitions(save_data: dict, previous_data: dict | None = None) -> list[str]:
+        """
+        Reject impossible or suspicious save progress.
+
+        This does not make a local game save impossible to tamper with, but it
+        prevents the cloud/dashboard record from accepting obvious cheats such
+        as skipped chapters, completed professors without passing grades, and
+        lowering retake counts or improving grades after completion.
+        """
+        errors = []
+        previous_data = previous_data if isinstance(previous_data, dict) else {}
+
+        # Story milestones must be internally ordered.
+        seen_incomplete = False
+        for milestone in GameSaveView.STORY_MILESTONES:
+            is_done = bool(save_data.get(milestone, False))
+            if is_done and seen_incomplete:
+                errors.append(f'{milestone} cannot be completed before earlier story milestones.')
+            if not is_done:
+                seen_incomplete = True
+
+        # Completed cloud milestones should not be undone by a later upload.
+        for milestone in GameSaveView.STORY_MILESTONES:
+            if previous_data.get(milestone, False) and not save_data.get(milestone, False):
+                errors.append(f'{milestone} cannot be changed from completed back to incomplete.')
+
+        # Counters should not move backwards once synced.
+        monotonic_int_fields = [
+            'challenges_completed',
+            'credits',
+            'thesis_panelist_progress',
+            'ch1_quiz_score',
+            'ch1_remedial_score',
+        ]
+        monotonic_int_fields += [f'{prefix}_retake_count' for prefix in GameSaveView.PROFESSOR_PREFIXES]
+        for field in monotonic_int_fields:
+            if field in previous_data and field in save_data:
+                try:
+                    old_value = int(previous_data.get(field, 0) or 0)
+                    new_value = int(save_data.get(field, 0) or 0)
+                    if new_value < old_value:
+                        errors.append(f'{field} cannot decrease from {old_value} to {new_value}.')
+                except (ValueError, TypeError):
+                    # Type-specific validation reports the clearer error.
+                    pass
+
+        # Professor completion must carry a passing story-mode grade.
+        for prefix in GameSaveView.PROFESSOR_PREFIXES:
+            done_key = f'{prefix}_teaching_done'
+            grade_key = f'{prefix}_final_grade'
+            retake_key = f'{prefix}_retake_count'
+            removal_key = f'{prefix}_removal_passed'
+
+            if save_data.get(done_key, False):
+                try:
+                    grade = float(save_data.get(grade_key, 0.0) or 0.0)
+                except (ValueError, TypeError):
+                    grade = 0.0
+                if grade not in GameSaveView.PASSING_GRADES:
+                    errors.append(f'{done_key} requires a passing {grade_key}.')
+
+            # A completed professor's recorded grade should not improve after it
+            # has already been synced, because the story route does not provide
+            # grade retakes after completion.
+            if previous_data.get(done_key, False) and save_data.get(done_key, False):
+                try:
+                    old_grade = float(previous_data.get(grade_key, 0.0) or 0.0)
+                    new_grade = float(save_data.get(grade_key, 0.0) or 0.0)
+                    if old_grade > 0 and new_grade > 0 and new_grade < old_grade:
+                        errors.append(f'{grade_key} cannot improve after {done_key} is already synced.')
+                except (ValueError, TypeError):
+                    pass
+
+            if save_data.get(removal_key, False):
+                try:
+                    retake_count = int(save_data.get(retake_key, 0) or 0)
+                except (ValueError, TypeError):
+                    retake_count = 0
+                if retake_count <= 0:
+                    errors.append(f'{removal_key} requires at least one retake in {retake_key}.')
+
+        # Thesis completion requires all professor modules and panelists.
+        if save_data.get('thesis_completed', False):
+            missing = [
+                f'{prefix}_teaching_done'
+                for prefix in GameSaveView.PROFESSOR_PREFIXES
+                if not save_data.get(f'{prefix}_teaching_done', False)
+            ]
+            if missing:
+                errors.append('thesis_completed requires all professor modules to be completed first.')
+            try:
+                panelist_progress = int(save_data.get('thesis_panelist_progress', 0) or 0)
+            except (ValueError, TypeError):
+                panelist_progress = 0
+            if panelist_progress < 3:
+                errors.append('thesis_completed requires thesis_panelist_progress to be 3.')
+            for index in range(1, 4):
+                try:
+                    grade = float(save_data.get(f'thesis_panelist_{index}_grade', 0.0) or 0.0)
+                except (ValueError, TypeError):
+                    grade = 0.0
+                if grade not in GameSaveView.PASSING_GRADES:
+                    errors.append(f'thesis_completed requires a passing thesis_panelist_{index}_grade.')
 
         return errors
 
@@ -309,6 +563,9 @@ class GameSaveView(APIView):
 
         # ── Server-side validation ──
         validation_errors = self._validate_save_data(save_data)
+        existing_save = GameSave.objects.filter(user=request.user).first()
+        previous_save_data = existing_save.save_data if existing_save else None
+        validation_errors.extend(self._validate_progress_transitions(save_data, previous_save_data))
         if validation_errors:
             return Response(
                 {'detail': 'Save data validation failed.', 'errors': validation_errors},
