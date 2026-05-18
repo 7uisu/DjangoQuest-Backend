@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand
 from decouple import config
+from users.models import Profile
 
 
 class Command(BaseCommand):
@@ -36,6 +37,7 @@ class Command(BaseCommand):
         user.is_student = False
         user.set_password(password)
         user.save()
+        Profile.objects.get_or_create(user=user)
 
         action = 'Created' if created else 'Updated'
         self.stdout.write(self.style.SUCCESS(f'{action} admin account for {email}.'))
