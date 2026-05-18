@@ -10,6 +10,14 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        migrations.AlterUniqueTogether(
+            name='userinteractiveenrollment',
+            unique_together=None,
+        ),
+        migrations.AlterUniqueTogether(
+            name='userstepsubmission',
+            unique_together=None,
+        ),
         migrations.RemoveField(
             model_name='userinteractiveenrollment',
             name='current_step',
@@ -26,10 +34,6 @@ class Migration(migrations.Migration):
             model_name='userinteractiveenrollment',
             name='tutorial',
         ),
-        migrations.AlterUniqueTogether(
-            name='userinteractiveenrollment',
-            unique_together=None,
-        ),
         migrations.RemoveField(
             model_name='userinteractiveenrollment',
             name='user',
@@ -37,10 +41,6 @@ class Migration(migrations.Migration):
         migrations.RemoveField(
             model_name='userstepsubmission',
             name='enrollment',
-        ),
-        migrations.AlterUniqueTogether(
-            name='userstepsubmission',
-            unique_together=None,
         ),
         migrations.DeleteModel(
             name='InteractiveStep',

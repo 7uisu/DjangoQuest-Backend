@@ -247,8 +247,8 @@ class GameSaveTest(TestCase):
         }, format='json')
         resp = self.client.get(self.url)
         data = resp.json()
-        # 7 of 12 flags true → 58.3%
-        self.assertAlmostEqual(data['story_progress_percent'], 58.3, places=1)
+        # 7 of 13 flags true -> 53.8%
+        self.assertAlmostEqual(data['story_progress_percent'], 53.8, places=1)
         self.assertEqual(data['challenges_completed'], 12)
         self.assertEqual(data['learning_modules_completed'], 2)
 
