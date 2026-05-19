@@ -1,0 +1,1038 @@
+[
+{
+  "model": "app.videotutorial",
+  "pk": 3,
+  "fields": {
+    "title": "Creating Project and App",
+    "description": "The foundation of every Django project. You learn to create a Virtual Environment, install the Django framework, and use the startproject and startapp commands to generate the initial file structure.",
+    "video_url": "https://youtu.be/FfH9ki0QuUg?si=YRY3xgB0X6Caxe5R",
+    "topic": "",
+    "order": 1,
+    "is_active": true,
+    "created_at": "2026-04-26T03:55:01.684Z",
+    "updated_at": "2026-04-26T05:47:00.364Z"
+  }
+},
+{
+  "model": "app.videotutorial",
+  "pk": 4,
+  "fields": {
+    "title": "Template and Django Language",
+    "description": "Moving from simple strings to HTML files. It introduces the Django Template Language (DTL), which allows you to pass data from Python to HTML using {{ variables }} and control logic with {% loops %}.",
+    "video_url": "https://youtu.be/hQ8rbfUG5FY?si=49eVxKrxGLHM5Ln2",
+    "topic": "",
+    "order": 2,
+    "is_active": true,
+    "created_at": "2026-04-26T03:55:37.365Z",
+    "updated_at": "2026-04-26T05:47:00.368Z"
+  }
+},
+{
+  "model": "app.videotutorial",
+  "pk": 5,
+  "fields": {
+    "title": "Static Files - Working with CSS, JS, and Images",
+    "description": "The styling phase. This video explains how to configure Django to serve CSS, JavaScript, and Images. You learn to use the {% load static %} tag to link your stylesheets and make the site look professional.",
+    "video_url": "https://youtu.be/axA1VqEzm54?si=upzxCQMflDvhlxzG",
+    "topic": "",
+    "order": 3,
+    "is_active": true,
+    "created_at": "2026-04-26T03:56:05.901Z",
+    "updated_at": "2026-04-26T05:47:00.371Z"
+  }
+},
+{
+  "model": "app.videotutorial",
+  "pk": 6,
+  "fields": {
+    "title": "Pushing Django Project to GitHub",
+    "description": "Version control and collaboration. You learn how to initialize a Git repository, create a .gitignore file to keep your database and environment private, and push your code to GitHub.",
+    "video_url": "https://youtu.be/_aQoopz_aSs?si=6YBQZfvPiWTMyXXa",
+    "topic": "",
+    "order": 4,
+    "is_active": true,
+    "created_at": "2026-04-26T03:56:56.096Z",
+    "updated_at": "2026-04-26T05:47:00.374Z"
+  }
+},
+{
+  "model": "app.videotutorial",
+  "pk": 7,
+  "fields": {
+    "title": "Models and Admin Relationship",
+    "description": "Your first interaction with the database. You define a Model (a blueprint for your data), run Migrations to create the tables, and set up a Superuser to manage data via the built-in Django Admin dashboard.",
+    "video_url": "https://youtu.be/EsPTQORzW9k?si=lUTU_D3Z7Z316rsb",
+    "topic": "",
+    "order": 5,
+    "is_active": true,
+    "created_at": "2026-04-26T03:57:35.499Z",
+    "updated_at": "2026-04-26T05:47:00.380Z"
+  }
+},
+{
+  "model": "app.videotutorial",
+  "pk": 8,
+  "fields": {
+    "title": "Class-Based View (List View)",
+    "description": "The first of the Class-Based Views. This video teaches you how to automatically fetch a list of all records from your database and display them on a page with minimal code.",
+    "video_url": "https://youtu.be/EK1HcTuR-tk?si=y50lkxuPxraDE62I",
+    "topic": "",
+    "order": 6,
+    "is_active": true,
+    "created_at": "2026-04-26T03:58:21.599Z",
+    "updated_at": "2026-04-26T05:47:00.384Z"
+  }
+},
+{
+  "model": "app.videotutorial",
+  "pk": 9,
+  "fields": {
+    "title": "Class-Based View (Detail View)",
+    "description": "Focusing on individual items. You learn to create dynamic URLs that use a Primary Key (ID) to pull up the full details of one specific record, like a single book's full description.",
+    "video_url": "https://youtu.be/FU14iL3X_7U?si=9KDZQBNuTkcUr1jL",
+    "topic": "",
+    "order": 7,
+    "is_active": true,
+    "created_at": "2026-04-26T03:58:52.940Z",
+    "updated_at": "2026-04-26T05:47:00.389Z"
+  }
+},
+{
+  "model": "app.videotutorial",
+  "pk": 10,
+  "fields": {
+    "title": "Class-Based View (Create View)",
+    "description": "Data entry from the frontend. This video covers how to generate an HTML form that allows users to type in information and save it directly to your database, including the mandatory {% csrf_token %} for security.",
+    "video_url": "https://youtu.be/XLBOnkjD1b8?si=52chBGwo1flCd05P",
+    "topic": "",
+    "order": 8,
+    "is_active": true,
+    "created_at": "2026-04-26T03:59:27.967Z",
+    "updated_at": "2026-04-26T05:47:00.392Z"
+  }
+},
+{
+  "model": "app.videotutorial",
+  "pk": 11,
+  "fields": {
+    "title": "Class-Based View  (Update View)",
+    "description": "Editing existing data. You learn to reuse your form templates to create a page where users can modify records. Django automatically fills the form with the current data based on the ID in the URL.",
+    "video_url": "https://youtu.be/uXI3QXMRq6c?si=vOvyE7GxZtL-Vi2l",
+    "topic": "",
+    "order": 9,
+    "is_active": true,
+    "created_at": "2026-04-26T04:00:11.587Z",
+    "updated_at": "2026-04-26T05:47:00.396Z"
+  }
+},
+{
+  "model": "app.videotutorial",
+  "pk": 12,
+  "fields": {
+    "title": "Class Based View (Delete View)",
+    "description": "Safely removing data. This video explains how to set up a Confirmation Template so users can delete a record after confirming they didn't click the button by mistake.",
+    "video_url": "https://youtu.be/vtztZ02nQGA?si=Umnw-pZf3J4UnomR",
+    "topic": "",
+    "order": 10,
+    "is_active": true,
+    "created_at": "2026-04-26T04:00:35.100Z",
+    "updated_at": "2026-04-26T05:47:00.410Z"
+  }
+},
+{
+  "model": "app.videotutorial",
+  "pk": 13,
+  "fields": {
+    "title": "Database Schema",
+    "description": "The architectural blueprint. This is a planning lesson on Relational Databases, teaching you how to visualize how different tables (like Authors, Publishers, and Books) should connect to each other.",
+    "video_url": "https://youtu.be/GULmdL-nL7s?si=wBQXwi-WAVU3NUEo",
+    "topic": "",
+    "order": 11,
+    "is_active": true,
+    "created_at": "2026-04-26T04:00:58.207Z",
+    "updated_at": "2026-04-26T05:47:00.414Z"
+  }
+},
+{
+  "model": "app.videotutorial",
+  "pk": 14,
+  "fields": {
+    "title": "Models and Relationship",
+    "description": "Translating the blueprint into code. You learn to use ForeignKey for One-to-Many links and ManyToManyField for complex Many-to-Many connections within your models.py.",
+    "video_url": "https://youtu.be/xbfmsvlbgFA?si=m8vkwryK62DkUdDv",
+    "topic": "",
+    "order": 12,
+    "is_active": true,
+    "created_at": "2026-04-26T04:01:17.362Z",
+    "updated_at": "2026-04-26T05:47:00.421Z"
+  }
+},
+{
+  "model": "app.videotutorial",
+  "pk": 15,
+  "fields": {
+    "title": "Django Model and HTML Form",
+    "description": "Total design control. Instead of using Django's auto-generated forms, you learn to build manual HTML inputs from scratch. This allows you to apply custom CSS classes and layouts to every part of your form.",
+    "video_url": "https://youtu.be/VLCH4QW9RVY?si=A0BsXm7gNqmO6a-m",
+    "topic": "",
+    "order": 13,
+    "is_active": true,
+    "created_at": "2026-04-26T04:01:57.393Z",
+    "updated_at": "2026-04-26T05:47:00.424Z"
+  }
+},
+{
+  "model": "app.videotutorial",
+  "pk": 16,
+  "fields": {
+    "title": "Django Quering - Filtering, Odering & Aggregating Data",
+    "description": "Advanced data management. The series finale teaches you how to build a Search Bar, sort your list by specific categories, and use Aggregation to calculate totals (like the total price of all books) across your database.",
+    "video_url": "https://youtu.be/udPyQqcmQIM?si=NTBxRZz66c-EOK9Q",
+    "topic": "",
+    "order": 14,
+    "is_active": true,
+    "created_at": "2026-04-26T04:02:56.978Z",
+    "updated_at": "2026-04-26T05:47:00.428Z"
+  }
+},
+{
+  "model": "app.videostep",
+  "pk": 16,
+  "fields": {
+    "tutorial": 3,
+    "title": "Environment Preparation",
+    "content": "Before starting, create a dedicated folder for your work and navigate into it using your terminal.\n\n**Create a Virtual Environment:**\nThis command creates a folder (usually named `venv` or `.venv`) that contains a local copy of Python.\n\n```bash\npython -m venv venv\n```\n\n**Activate the Environment:**\nYou must activate the environment so that any packages you install stay inside this project.\n\n- **Windows**: `venv\\Scripts\\activate`\n- **macOS/Linux**: `source venv/bin/activate`",
+    "order": 1
+  }
+},
+{
+  "model": "app.videostep",
+  "pk": 17,
+  "fields": {
+    "tutorial": 3,
+    "title": "Installing Django",
+    "content": "With the virtual environment active (you should see `(venv)` in your terminal prompt), install the Django framework:\n\n```bash\npip install django\n```",
+    "order": 2
+  }
+},
+{
+  "model": "app.videostep",
+  "pk": 18,
+  "fields": {
+    "tutorial": 3,
+    "title": "Initializing the Project",
+    "content": "A \"Project\" is the entire website or configuration. Use the `django-admin` tool to generate the boilerplate code.\n\n```bash\ndjango-admin startproject myproject .\n```\n\n*Note: Adding the `.` at the end tells Django to install the files in the current folder rather than creating an extra sub-folder.*",
+    "order": 3
+  }
+},
+{
+  "model": "app.videostep",
+  "pk": 19,
+  "fields": {
+    "tutorial": 3,
+    "title": "Creating a Django App",
+    "content": "In Django, a \"Project\" can contain multiple \"Apps\" (e.g., a \"blog\" app, a \"users\" app, or a \"learning\" app).\n\n```bash\npython manage.py startapp myapp\n```\nThis creates a folder named `myapp` with files like `models.py` (for database structure) and `views.py` (for logic).",
+    "order": 4
+  }
+},
+{
+  "model": "app.videostep",
+  "pk": 20,
+  "fields": {
+    "tutorial": 3,
+    "title": "Registering the App",
+    "content": "Django will not recognize your new app until you explicitly tell the project about it.\n\n1. Open `myproject/settings.py`.\n2. Locate the `INSTALLED_APPS` list.\n3. Add your app name to the list:\n\n```python\nINSTALLED_APPS = [\n    'django.contrib.admin',\n    'django.contrib.auth',\n    # ... other defaults ...\n    'myapp', \n]\n```",
+    "order": 5
+  }
+},
+{
+  "model": "app.videostep",
+  "pk": 21,
+  "fields": {
+    "tutorial": 3,
+    "title": "Database Migration",
+    "content": "Django comes with built-in features (like an admin panel and user authentication) that require database tables. Initialize these by running:\n\n```bash\npython manage.py migrate\n```",
+    "order": 6
+  }
+},
+{
+  "model": "app.videostep",
+  "pk": 22,
+  "fields": {
+    "tutorial": 3,
+    "title": "Launching the Development Server",
+    "content": "To see your project in action, start the built-in local web server:\n\n```bash\npython manage.py runserver\n```\n\nOnce the server is running, open your browser and go to `http://127.0.0.1:8000/`. You should see the Django \"success\" page featuring a rocket taking off!",
+    "order": 7
+  }
+},
+{
+  "model": "app.videostep",
+  "pk": 23,
+  "fields": {
+    "tutorial": 4,
+    "title": "Creating the Templates Directory",
+    "content": "Django needs to know where your HTML files are stored. By default, it looks for a folder named `templates`.\n\n**Create the folder:**\nInside your main project directory (the same level as `manage.py`), create a folder named `templates`.\n\n```bash\nmkdir templates\n```\n\n**Configure Settings:**\nOpen `myproject/settings.py`, find the `TEMPLATES` list, and update the `'DIRS'` key so Django knows where to look:\n\n```python\n'DIRS': [BASE_DIR / 'templates'],\n```",
+    "order": 1
+  }
+},
+{
+  "model": "app.videostep",
+  "pk": 24,
+  "fields": {
+    "tutorial": 4,
+    "title": "Creating a Base Layout (Template Inheritance)",
+    "content": "Instead of rewriting the navigation bar or footer on every page, you create one \"Base\" file that others will \"Extend.\"\n\n**Create base.html:**\nInside your templates folder, create `base.html`.\n\n**Define Blocks:**\nUse `{% block content %}` and `{% endblock %}` tags. These are placeholders where unique content from other pages will be \"injected.\"\n\n```html\n<html>\n<body>\n    <nav>Navigation Bar</nav>\n\n    {% block content %}\n    {% endblock %}\n</body>\n</html>\n```",
+    "order": 2
+  }
+},
+{
+  "model": "app.videostep",
+  "pk": 25,
+  "fields": {
+    "tutorial": 4,
+    "title": "Writing a View to Render the Template",
+    "content": "The \"View\" is the logic that connects your URL to your HTML file.\n\n**Open myapp/views.py:**\nDefine a function that uses the `render` shortcut.\n\n```python\nfrom django.shortcuts import render\n\ndef home(request):\n    return render(request, 'home.html')\n```",
+    "order": 3
+  }
+},
+{
+  "model": "app.videostep",
+  "pk": 26,
+  "fields": {
+    "tutorial": 4,
+    "title": "Creating the Child Template",
+    "content": "Now, create the specific page that uses the base layout.\n\n**Create home.html:**\nInside your templates folder, create `home.html`.\n\n**Extend the Base:**\nUse the `{% extends %}` tag at the very top.\n\n```html\n{% extends 'base.html' %}\n\n{% block content %}\n<h1>Welcome to the Home Page!</h1>\n<p>This content is inside the base layout.</p>\n{% endblock %}\n```",
+    "order": 4
+  }
+},
+{
+  "model": "app.videostep",
+  "pk": 27,
+  "fields": {
+    "tutorial": 4,
+    "title": "Working with Django Template Language (DTL)",
+    "content": "DTL allows you to pass data from your Python code into your HTML.\n\n**Passing Context:**\nIn `views.py`, send a dictionary (the \"context\") to the template:\n\n```python\ndef home(request):\n    context = {'username': 'Hansu', 'items': ['Python', 'Django', 'Godot']}\n    return render(request, 'home.html', context)\n```\n\n**Displaying Data in HTML:**\n- **Variables**: Use double curly braces `{{ username }}`.\n- **Logic (Loops/Ifs)**: Use curly braces with percent signs.\n\n```html\n<p>Hello, {{ username }}!</p>\n\n<ul>\n{% for item in items %}\n    <li>{{ item }}</li>\n{% empty %}\n    <li>No items found.</li>\n{% endfor %}\n</ul>\n```",
+    "order": 5
+  }
+},
+{
+  "model": "app.videostep",
+  "pk": 28,
+  "fields": {
+    "tutorial": 4,
+    "title": "Mapping the URL",
+    "content": "Finally, you must tell Django which URL should trigger your new view.\n\n**Open myproject/urls.py:**\n\n```python\nfrom django.urls import path\nfrom myapp import views\n\nurlpatterns = [\n    path('', views.home, name='home'),\n]\n```\n\nWhen you run `python manage.py runserver` and visit your site, you will now see your HTML page rendered with the dynamic data you provided.",
+    "order": 6
+  }
+},
+{
+  "model": "app.videostep",
+  "pk": 29,
+  "fields": {
+    "tutorial": 5,
+    "title": "Creating the Static Directory",
+    "content": "Similar to templates, Django needs a specific place to look for your \"static\" assets like CSS files, JavaScript, and images.\n\n**Create the folder:**\nInside your main project directory (where `manage.py` is), create a folder named `static`.\n\n```bash\nmkdir static\n```\n\n**Organize Subfolders:**\nIt is best practice to organize your assets immediately. Inside `static`, create three folders:\n\n```bash\nmkdir static/css static/js static/images\n```",
+    "order": 1
+  }
+},
+{
+  "model": "app.videostep",
+  "pk": 30,
+  "fields": {
+    "tutorial": 5,
+    "title": "Configuring Settings",
+    "content": "You must tell Django where this folder is located so it can serve the files during development.\n\n**Open myproject/settings.py:**\nFind the `STATIC_URL` line and add `STATICFILES_DIRS` below it:\n\n```python\nSTATIC_URL = 'static/'\n\n# Add this to point to your new folder\nSTATICFILES_DIRS = [\n    BASE_DIR / 'static',\n]\n```",
+    "order": 2
+  }
+},
+{
+  "model": "app.videostep",
+  "pk": 31,
+  "fields": {
+    "tutorial": 5,
+    "title": "Loading Static Files in Templates",
+    "content": "To use these files in your HTML, you must use a special Django tag that generates the correct URL for each file.\n\n**The Load Tag:**\nAt the very top of your HTML file (usually `base.html`), add:\n\n```html\n{% load static %}\n```\n\n**Linking a CSS File:**\nInstead of a hardcoded path, use the static tag:\n\n```html\n<link rel=\"stylesheet\" href=\"{% static 'css/style.css' %}\">\n```",
+    "order": 3
+  }
+},
+{
+  "model": "app.videostep",
+  "pk": 32,
+  "fields": {
+    "tutorial": 5,
+    "title": "Adding Images and JavaScript",
+    "content": "The process is the same for other asset types. Once the folder is linked, you reference them using the same tag logic.\n\n**Displaying an Image:**\nPlace an image (e.g., `logo.png`) in `static/images/` and call it like this:\n\n```html\n<img src=\"{% static 'images/logo.png' %}\" alt=\"Logo\">\n```\n\n**Linking JavaScript:**\nPlace your script in `static/js/main.js` and add it before the closing `</body>` tag:\n\n```html\n<script src=\"{% static 'js/main.js' %}\"></script>\n```",
+    "order": 4
+  }
+},
+{
+  "model": "app.videostep",
+  "pk": 33,
+  "fields": {
+    "tutorial": 5,
+    "title": "Testing the Setup",
+    "content": "If your styles aren't appearing, follow these troubleshooting steps:\n\n- **Check the Terminal**: If you see `GET /static/css/style.css HTTP/1.1\" 404`, Django cannot find the file. Double-check your `STATICFILES_DIRS` path.\n- **Hard Refresh**: Sometimes browsers cache old CSS. Press `Ctrl + F5` (Windows) or `Cmd + Shift + R` (Mac) to force the browser to download the latest version.",
+    "order": 5
+  }
+},
+{
+  "model": "app.videostep",
+  "pk": 34,
+  "fields": {
+    "tutorial": 5,
+    "title": "Why Use the Static Tag?",
+    "content": "Using `{% static 'path' %}` instead of `/static/path` is critical. When you eventually move your project to a real server (production), the location of these files might change. The Django tag will automatically update the URLs for you, so you don't have to manually edit every HTML file.",
+    "order": 6
+  }
+},
+{
+  "model": "app.videostep",
+  "pk": 35,
+  "fields": {
+    "tutorial": 6,
+    "title": "Initializing Git Locally",
+    "content": "Before sending your code to GitHub, you must turn your project folder into a \"Git Repository.\"\n\n**Initialize Git:**\nOpen your terminal in the root folder (where `manage.py` is) and run:\n\n```bash\ngit init\n```\n\n**Check Status:**\nTo see which files Git is tracking (they will likely be red/untracked at first):\n\n```bash\ngit status\n```",
+    "order": 1
+  }
+},
+{
+  "model": "app.videostep",
+  "pk": 36,
+  "fields": {
+    "tutorial": 6,
+    "title": "Creating a .gitignore File",
+    "content": "This is the most critical step. You do not want to upload your virtual environment (`venv`) or your local database (`db.sqlite3`) to GitHub.\n\n**Create the file:**\nIn your root directory, create a file named exactly `.gitignore`.\n\n**Add the following lines:**\n\n```plaintext\nvenv/\n*.pyc\n__pycache__/\ndb.sqlite3\n.DS_Store\n```",
+    "order": 2
+  }
+},
+{
+  "model": "app.videostep",
+  "pk": 37,
+  "fields": {
+    "tutorial": 6,
+    "title": "Staging and Committing Changes",
+    "content": "A \"Commit\" is like a snapshot of your project at a specific point in time.\n\n**Stage all files:**\nTell Git to prepare all files (except those in `.gitignore`) for the snapshot:\n\n```bash\ngit add .\n```\n\n**Commit the snapshot:**\nGive your snapshot a descriptive name:\n\n```bash\ngit commit -m \"Initial commit: Django project setup with apps and static files\"\n```",
+    "order": 3
+  }
+},
+{
+  "model": "app.videostep",
+  "pk": 38,
+  "fields": {
+    "tutorial": 6,
+    "title": "Connecting to GitHub",
+    "content": "Now you need to link your local project to a \"Remote\" repository on GitHub.\n\n**Create a Repository on GitHub:**\nGo to github.com, create a new repository (keep it empty, don't add a README yet), and copy the repository URL.\n\n**Link the Remote:**\nReplace the URL below with yours:\n\n```bash\ngit remote add origin https://github.com/YourUsername/YourRepoName.git\n```\n\n**Set the Branch:**\nMost modern systems use `main` as the default branch:\n\n```bash\ngit branch -M main\n```",
+    "order": 4
+  }
+},
+{
+  "model": "app.videostep",
+  "pk": 39,
+  "fields": {
+    "tutorial": 6,
+    "title": "Pushing Code to the Cloud",
+    "content": "The final step is to upload your local commits to the GitHub server.\n\n**Push the code:**\n\n```bash\ngit push -u origin main\n```\n*(The `-u` flag remembers your settings so next time you only need to type `git push`.)*",
+    "order": 5
+  }
+},
+{
+  "model": "app.videostep",
+  "pk": 40,
+  "fields": {
+    "tutorial": 6,
+    "title": "The Collaboration Workflow",
+    "content": "When working with a partner, remember the \"Git Loop\" to avoid conflicts:\n\n1. **Pull**: `git pull origin main` (Get the latest changes from your friend).\n2. **Work**: Edit your code.\n3. **Add**: `git add .`\n4. **Commit**: `git commit -m \"Explain what you changed\"`\n5. **Push**: `git push origin main` (Send your changes back to GitHub).",
+    "order": 6
+  }
+},
+{
+  "model": "app.videostep",
+  "pk": 41,
+  "fields": {
+    "tutorial": 7,
+    "title": "Defining a Model",
+    "content": "A \"Model\" is a Python class that represents a table in your database. Each attribute in the class represents a column.\n\n**Open myapp/models.py:**\nCreate a simple class to store data (e.g., a \"Book\" or \"Task\").\n\n```python\nfrom django.db import models\n\nclass Book(models.Model):\n    title = models.CharField(max_length=200)\n    description = models.TextField()\n    date_published = models.DateTimeField(auto_now_add=True)\n\n    def __str__(self):\n        return self.title\n```\n*Note: The `__str__` method ensures that when you see a list of books in the admin panel, it shows the actual title instead of generic text like \"Book Object (1)\".*",
+    "order": 1
+  }
+},
+{
+  "model": "app.videostep",
+  "pk": 42,
+  "fields": {
+    "tutorial": 7,
+    "title": "Activating the Model (Migrations)",
+    "content": "Every time you change your `models.py`, you must tell Django to update the database structure.\n\n**Make Migrations:**\nThis creates a \"plan\" for the changes.\n\n```bash\npython manage.py makemigrations\n```\n\n**Migrate:**\nThis applies the plan to the actual database file.\n\n```bash\npython manage.py migrate\n```",
+    "order": 2
+  }
+},
+{
+  "model": "app.videostep",
+  "pk": 43,
+  "fields": {
+    "tutorial": 7,
+    "title": "Creating a Superuser",
+    "content": "To access the built-in Django Admin dashboard, you need an administrator account.\n\n**Run the creation command:**\n\n```bash\npython manage.py createsuperuser\n```\n*Follow the prompts to enter a username, email, and password. (Note: The password will be invisible while you type it).*",
+    "order": 3
+  }
+},
+{
+  "model": "app.videostep",
+  "pk": 44,
+  "fields": {
+    "tutorial": 7,
+    "title": "Registering Models for the Admin Panel",
+    "content": "By default, your custom models don't show up in the admin dashboard. You must register them.\n\n**Open myapp/admin.py:**\n\n```python\nfrom django.contrib import admin\nfrom .models import Book\n\nadmin.site.register(Book)\n```",
+    "order": 4
+  }
+},
+{
+  "model": "app.videostep",
+  "pk": 45,
+  "fields": {
+    "tutorial": 7,
+    "title": "Managing Data via the Dashboard",
+    "content": "Now you can use a visual interface to add, edit, or delete data without writing SQL.\n\n1. **Start your server**: `python manage.py runserver`.\n2. In your browser, go to `http://127.0.0.1:8000/admin/`.\n3. Log in with your superuser credentials.\n4. You will see your \"Books\" model. Click **Add** to create a new entry.",
+    "order": 5
+  }
+},
+{
+  "model": "app.videostep",
+  "pk": 46,
+  "fields": {
+    "tutorial": 7,
+    "title": "Relationship Overview",
+    "content": "Django handles the connection between your code and the database (ORM - Object Relational Mapper). When you add a book in the Admin panel, Django automatically writes the SQL to save it into `db.sqlite3`.",
+    "order": 6
+  }
+},
+{
+  "model": "app.videostep",
+  "pk": 47,
+  "fields": {
+    "tutorial": 8,
+    "title": "Why Use Class-Based Views?",
+    "content": "While \"Function-Based Views\" (like the ones in previous steps) are great for simple logic, `ListView` automates the most common task in web development: retrieving all records from a table and sending them to a template. It reduces the amount of repetitive code you have to write.",
+    "order": 1
+  }
+},
+{
+  "model": "app.videostep",
+  "pk": 48,
+  "fields": {
+    "tutorial": 8,
+    "title": "Implementing the ListView",
+    "content": "Instead of writing a function that queries the database manually, you create a class that inherits from Django’s built-in `ListView`.\n\n**Open myapp/views.py:**\n\n```python\nfrom django.views.generic import ListView\nfrom .models import Book\n\nclass BookListView(ListView):\n    model = Book\n    template_name = 'book_list.html'  # The HTML file to use\n    context_object_name = 'all_books' # The name used in the HTML loop\n```",
+    "order": 2
+  }
+},
+{
+  "model": "app.videostep",
+  "pk": 49,
+  "fields": {
+    "tutorial": 8,
+    "title": "Configuring the URL for a Class",
+    "content": "Because this is a class and not a function, you must use the `.as_view()` method when defining the URL.\n\n**Open myproject/urls.py:**\n\n```python\nfrom django.urls import path\nfrom myapp.views import BookListView\n\nurlpatterns = [\n    path('books/', BookListView.as_view(), name='book-list'),\n]\n```",
+    "order": 3
+  }
+},
+{
+  "model": "app.videostep",
+  "pk": 50,
+  "fields": {
+    "tutorial": 8,
+    "title": "Displaying the List in HTML",
+    "content": "In your template, you use the `context_object_name` you defined in the view to loop through your data.\n\n**Create templates/book_list.html:**\n\n```html\n{% extends 'base.html' %}\n\n{% block content %}\n<h1>Available Books</h1>\n<ul>\n    {% for book in all_books %}\n        <li>{{ book.title }} - {{ book.date_published }}</li>\n    {% empty %}\n        <li>No books available yet.</li>\n    {% endfor %}\n</ul>\n{% endblock %}\n```",
+    "order": 4
+  }
+},
+{
+  "model": "app.videostep",
+  "pk": 51,
+  "fields": {
+    "tutorial": 8,
+    "title": "Automatic Context Handling",
+    "content": "If you don't define a `context_object_name`, Django defaults to calling the list `object_list`. However, naming it (e.g., `all_books`) makes your HTML much easier to read.",
+    "order": 5
+  }
+},
+{
+  "model": "app.videostep",
+  "pk": 52,
+  "fields": {
+    "tutorial": 8,
+    "title": "Testing the View",
+    "content": "Ensure you have added some books via the Admin Panel (from the 5th video).\n\n1. **Run the server**: `python manage.py runserver`.\n2. Navigate to `http://127.0.0.1:8000/books/`.\n3. You should see a clean list of all the books currently stored in your database.",
+    "order": 6
+  }
+},
+{
+  "model": "app.videostep",
+  "pk": 53,
+  "fields": {
+    "tutorial": 9,
+    "title": "Implementing the DetailView",
+    "content": "This class handles the logic of looking up a specific record in the database using the \"Primary Key\" (PK) provided in the URL.\n\n**Open myapp/views.py:**\n\n```python\nfrom django.views.generic import DetailView\nfrom .models import Book\n\nclass BookDetailView(DetailView):\n    model = Book\n    template_name = 'book_detail.html'\n    context_object_name = 'book_info'\n```",
+    "order": 1
+  }
+},
+{
+  "model": "app.videostep",
+  "pk": 54,
+  "fields": {
+    "tutorial": 9,
+    "title": "Dynamic URL Routing",
+    "content": "To tell Django which book to show, the URL must include a variable. Django uses `<int:pk>` to capture the ID from the address bar.\n\n**Open myproject/urls.py:**\n\n```python\nfrom django.urls import path\nfrom myapp.views import BookDetailView\n\nurlpatterns = [\n    # ... other paths ...\n    path('book/<int:pk>/', BookDetailView.as_view(), name='book-detail'),\n]\n```\n*Example: Visiting `/book/1/` will fetch the book with ID 1.*",
+    "order": 2
+  }
+},
+{
+  "model": "app.videostep",
+  "pk": 55,
+  "fields": {
+    "tutorial": 9,
+    "title": "Creating the Detail Template",
+    "content": "Since you are only viewing one object, you don't need a loop. You can access the attributes of the object directly using the name defined in your `context_object_name`.\n\n**Create templates/book_detail.html:**\n\n```html\n{% extends 'base.html' %}\n\n{% block content %}\n<div class=\"book-container\">\n    <h1>{{ book_info.title }}</h1>\n    <p><strong>Published on:</strong> {{ book_info.date_published }}</p>\n    <hr>\n    <p>{{ book_info.description }}</p>\n\n    <a href=\"{% url 'book-list' %}\">Back to Library</a>\n</div>\n{% endblock %}\n```",
+    "order": 3
+  }
+},
+{
+  "model": "app.videostep",
+  "pk": 56,
+  "fields": {
+    "tutorial": 9,
+    "title": "Linking List to Detail",
+    "content": "To make the app user-friendly, you should update your `book_list.html` so that clicking a book's name takes you to its specific detail page.\n\n**Update templates/book_list.html:**\n\n```html\n{% for book in all_books %}\n    <li>\n        <a href=\"{% url 'book-detail' book.pk %}\">{{ book.title }}</a>\n    </li>\n{% endfor %}\n```\n*The `book.pk` passes the unique ID of that specific book into the URL.*",
+    "order": 4
+  }
+},
+{
+  "model": "app.videostep",
+  "pk": 57,
+  "fields": {
+    "tutorial": 9,
+    "title": "Automatic 404 Handling",
+    "content": "One of the best features of DetailView is that if a user tries to visit a URL for an ID that doesn't exist (e.g., `/book/999/`), Django automatically raises a 404 Not Found error, saving you from writing manual error-checking code.",
+    "order": 5
+  }
+},
+{
+  "model": "app.videostep",
+  "pk": 58,
+  "fields": {
+    "tutorial": 9,
+    "title": "Testing the View",
+    "content": "1. Go to your list page (`/books/`).\n2. Click on one of the book titles.\n3. Ensure the URL changes to something like `/book/1/` and displays the full description of that specific book.",
+    "order": 6
+  }
+},
+{
+  "model": "app.videostep",
+  "pk": 59,
+  "fields": {
+    "tutorial": 10,
+    "title": "Implementing the CreateView",
+    "content": "To use this, you must specify the model you are adding data to and the specific fields you want the user to fill out.\n\n**Open myapp/views.py:**\n\n```python\nfrom django.views.generic.edit import CreateView\nfrom django.urls import reverse_lazy\nfrom .models import Book\n\nclass BookCreateView(CreateView):\n    model = Book\n    template_name = 'book_form.html'\n    fields = ['title', 'description'] # The columns from your model\n    success_url = reverse_lazy('book-list') # Where to go after saving\n```\n*Note: `reverse_lazy` is used to redirect the user back to the list page only after the data is successfully saved.*",
+    "order": 1
+  }
+},
+{
+  "model": "app.videostep",
+  "pk": 60,
+  "fields": {
+    "tutorial": 10,
+    "title": "Mapping the URL",
+    "content": "Since this is a page where users will go to \"add\" a book, give it a clear URL path.\n\n**Open myproject/urls.py:**\n\n```python\nfrom django.urls import path\nfrom myapp.views import BookCreateView\n\nurlpatterns = [\n    # ... other paths ...\n    path('book/new/', BookCreateView.as_view(), name='book-create'),\n]\n```",
+    "order": 2
+  }
+},
+{
+  "model": "app.videostep",
+  "pk": 61,
+  "fields": {
+    "tutorial": 10,
+    "title": "Creating the Form Template",
+    "content": "Django automatically generates a form object for you. You just need to place it inside an HTML `<form>` tag in your template.\n\n**Create templates/book_form.html:**\n\n```html\n{% extends 'base.html' %}\n\n{% block content %}\n<h1>Add a New Book</h1>\n<form method=\"POST\">\n    {% csrf_token %}\n    {{ form.as_p }}  \n    <button type=\"submit\">Save Book</button>\n</form>\n<br>\n<a href=\"{% url 'book-list' %}\">Cancel</a>\n{% endblock %}\n```",
+    "order": 3
+  }
+},
+{
+  "model": "app.videostep",
+  "pk": 62,
+  "fields": {
+    "tutorial": 10,
+    "title": "Understanding the CSRF Token",
+    "content": "Inside the HTML form, you see `{% csrf_token %}`. This is a mandatory security feature in Django. It prevents \"Cross-Site Request Forgery\" attacks by ensuring that the data being submitted is coming from your own website and not a malicious third party. Your form will not work without this tag.",
+    "order": 4
+  }
+},
+{
+  "model": "app.videostep",
+  "pk": 63,
+  "fields": {
+    "tutorial": 10,
+    "title": "Automatic Validation",
+    "content": "The CreateView is smart. If you defined a `max_length` in your model and the user types too much, or if a field is required and they leave it blank, Django will automatically reload the page and show an error message without you having to write any extra code.",
+    "order": 5
+  }
+},
+{
+  "model": "app.videostep",
+  "pk": 64,
+  "fields": {
+    "tutorial": 10,
+    "title": "Testing the Creation Flow",
+    "content": "1. Navigate to `http://127.0.0.1:8000/book/new/`.\n2. Fill out the title and description.\n3. Click \"Save Book.\"\n4. You should be redirected to the list page, and your new book should appear at the bottom of the list.",
+    "order": 6
+  }
+},
+{
+  "model": "app.videostep",
+  "pk": 65,
+  "fields": {
+    "tutorial": 11,
+    "title": "Implementing the UpdateView",
+    "content": "This class requires the model, the fields you want to allow the user to edit, and a template.\n\n**Open myapp/views.py:**\n\n```python\nfrom django.views.generic.edit import UpdateView\nfrom django.urls import reverse_lazy\nfrom .models import Book\n\nclass BookUpdateView(UpdateView):\n    model = Book\n    template_name = 'book_form.html' # You can reuse the creation template!\n    fields = ['title', 'description']\n    success_url = reverse_lazy('book-list')\n```\n*Note: By reusing `book_form.html`, you save time. Django is smart enough to fill the form with the existing data because it knows this is an \"Update\" action.*",
+    "order": 1
+  }
+},
+{
+  "model": "app.videostep",
+  "pk": 66,
+  "fields": {
+    "tutorial": 11,
+    "title": "Configuring the URL with a PK",
+    "content": "Just like the DetailView, the UpdateView needs to know which specific record you are editing. You must include the `<int:pk>` in the path.\n\n**Open myproject/urls.py:**\n\n```python\nfrom django.urls import path\nfrom myapp.views import BookUpdateView\n\nurlpatterns = [\n    # ... other paths ...\n    path('book/<int:pk>/update/', BookUpdateView.as_view(), name='book-update'),\n]\n```",
+    "order": 2
+  }
+},
+{
+  "model": "app.videostep",
+  "pk": 67,
+  "fields": {
+    "tutorial": 11,
+    "title": "Reusing the Template",
+    "content": "Since you are using `book_form.html`, the form will look the same as the \"Create\" page, but the input fields will already contain the current title and description of the book you selected.",
+    "order": 3
+  }
+},
+{
+  "model": "app.videostep",
+  "pk": 68,
+  "fields": {
+    "tutorial": 11,
+    "title": "Adding an Edit Link",
+    "content": "To make the application functional, add an \"Edit\" button next to each book in your list or on the detail page.\n\n**Update templates/book_list.html:**\n\n```html\n{% for book in all_books %}\n    <li>\n        {{ book.title }} \n        <a href=\"{% url 'book-update' book.pk %}\">[Edit]</a>\n    </li>\n{% endfor %}\n```",
+    "order": 4
+  }
+},
+{
+  "model": "app.videostep",
+  "pk": 69,
+  "fields": {
+    "tutorial": 11,
+    "title": "How it Works Under the Hood",
+    "content": "When you visit the update URL:\n\n1. Django uses the `pk` to fetch the record from the database.\n2. It populates the form object with that record's data.\n3. When you click \"Save,\" Django performs an `UPDATE` SQL command instead of an `INSERT` command, ensuring you don't create a duplicate entry.",
+    "order": 5
+  }
+},
+{
+  "model": "app.videostep",
+  "pk": 70,
+  "fields": {
+    "tutorial": 11,
+    "title": "Testing the Update Flow",
+    "content": "1. Navigate to your list page (`/books/`).\n2. Click the `[Edit]` link next to a book.\n3. Change the title or description in the form.\n4. Click \"Save.\"\n5. You should be redirected to the list page, where you will see the updated information immediately.",
+    "order": 6
+  }
+},
+{
+  "model": "app.videostep",
+  "pk": 71,
+  "fields": {
+    "tutorial": 13,
+    "title": "The Goal: Designing a Bookstore System",
+    "content": "The video uses an online bookstore as a real-world scenario to explain how different pieces of data should relate to one another. It introduces five core tables:\n\n- **Book**: The central table.\n- **User**: The person who adds the book to the system.\n- **Publisher**: The company that prints the book.\n- **Author**: The person who wrote the book.\n- **Store**: The physical or digital locations where the book is sold.",
+    "order": 1
+  }
+},
+{
+  "model": "app.videostep",
+  "pk": 72,
+  "fields": {
+    "tutorial": 13,
+    "title": "Understanding One-to-Many Relationships",
+    "content": "This is used when one record in Table A can be linked to many records in Table B.\n\n- **User to Book**: One user can add many books to the system, but each \"add\" entry is linked to that specific user.\n- **Publisher to Book**: One publisher can release many different books, but in this specific schema, each book is assigned to only one publisher.",
+    "order": 2
+  }
+},
+{
+  "model": "app.videostep",
+  "pk": 73,
+  "fields": {
+    "tutorial": 13,
+    "title": "Understanding Many-to-Many Relationships",
+    "content": "This is used when records on both sides can have multiple connections.\n\n- **Author to Book**: One author can write many books, AND one book can be co-authored by many people.\n- **Store to Book**: One store contains many different books, AND one specific book title can be found in many different stores.",
+    "order": 3
+  }
+},
+{
+  "model": "app.videostep",
+  "pk": 74,
+  "fields": {
+    "tutorial": 13,
+    "title": "Defining Attributes (Columns)",
+    "content": "The video outlines exactly what information (attributes) each table needs to function. For the `Book` table, the required fields are:\n\n- **ID**: The Primary Key.\n- **Title**: The name of the book.\n- **User ID**: A \"Foreign Key\" linking to the user who created it.\n- **Body**: The description or content.\n- **Price & Rating**: Numerical data for the listing.\n- **Publication Date**: When it was released.\n- **Publisher ID**: A \"Foreign Key\" linking to the publisher.",
+    "order": 4
+  }
+},
+{
+  "model": "app.videostep",
+  "pk": 75,
+  "fields": {
+    "tutorial": 13,
+    "title": "The \"Schema\" as a Blueprint",
+    "content": "The \"Schema\" acts as a map. Before you ever touch your `models.py` file, you should have this map drawn out. It ensures that you don't forget essential connections (like the link between a book and its publisher) which would be difficult to fix once the database is already full of data.",
+    "order": 5
+  }
+},
+{
+  "model": "app.videostep",
+  "pk": 76,
+  "fields": {
+    "tutorial": 13,
+    "title": "Why this Matters for Your Project",
+    "content": "For a project like DjangoQuest, this step is where you would decide how a \"Player\" relates to a \"Challenge\" or how a \"Laptop Item\" relates to an \"Inventory.\" Designing the schema first prevents errors when you later try to query data (like asking the database, \"Show me all books written by this specific author\").\n\n**What's next?**\nThe 11th video takes this exact blueprint and shows you how to translate it into Python code using Django Models.",
+    "order": 6
+  }
+},
+{
+  "model": "app.videostep",
+  "pk": 77,
+  "fields": {
+    "tutorial": 14,
+    "title": "Implementing the One-to-Many Relationship (ForeignKey)",
+    "content": "In Django, a one-to-many relationship is created using `models.ForeignKey`. This is used for the \"User\" and \"Publisher\" links to the \"Book.\"\n\n**The Code:**\n\n```python\nfrom django.db import models\nfrom django.contrib.auth.models import User # Built-in User table\n\nclass Publisher(models.Model):\n    name = models.CharField(max_length=200)\n\nclass Book(models.Model):\n    title = models.CharField(max_length=200)\n    # One user can have many books\n    user = models.ForeignKey(User, on_delete=models.CASCADE)\n    # One publisher can have many books\n    publisher = models.ForeignKey(Publisher, on_delete=models.CASCADE)\n```\n*Note: `on_delete=models.CASCADE` means if the User or Publisher is deleted, all their associated books will also be deleted.*",
+    "order": 1
+  }
+},
+{
+  "model": "app.videostep",
+  "pk": 78,
+  "fields": {
+    "tutorial": 14,
+    "title": "Implementing the Many-to-Many Relationship",
+    "content": "For relationships where both sides can have multiple connections (like Authors and Stores), you use `models.ManyToManyField`.\n\n**The Code:**\n\n```python\nclass Author(models.Model):\n    name = models.CharField(max_length=200)\n\nclass Store(models.Model):\n    name = models.CharField(max_length=200)\n\n# Adding these fields to the Book model\nclass Book(models.Model):\n    # ... previous fields ...\n    authors = models.ManyToManyField(Author)\n    stores = models.ManyToManyField(Store)\n```",
+    "order": 2
+  }
+},
+{
+  "model": "app.videostep",
+  "pk": 79,
+  "fields": {
+    "tutorial": 14,
+    "title": "Working with Numerical and Date Fields",
+    "content": "The video also introduces specific field types to handle prices, ratings, and dates accurately.\n\n- `DecimalField`: Best for money (Price) to avoid rounding errors.\n- `FloatField`: Used for Ratings.\n- `DateTimeField`: Used for the Publication Date.\n\n```python\nclass Book(models.Model):\n    # ...\n    price = models.DecimalField(max_digits=10, decimal_places=2)\n    rating = models.FloatField()\n    publication_date = models.DateTimeField()\n```",
+    "order": 3
+  }
+},
+{
+  "model": "app.videostep",
+  "pk": 80,
+  "fields": {
+    "tutorial": 14,
+    "title": "Cleaning Up the Database (The \"Reset\" Strategy)",
+    "content": "Because you are significantly changing the database structure (renaming tables or changing relationships), existing data can cause errors. The video demonstrates a \"Clean Reset\":\n\n1. Delete the migration files in the `migrations/` folder (except `__init__.py`).\n2. Delete the `db.sqlite3` file.\n3. Run `makemigrations` and `migrate` again.\n\n*Warning: This wipes all current data, so only do this during the early development phase!*",
+    "order": 4
+  }
+},
+{
+  "model": "app.videostep",
+  "pk": 81,
+  "fields": {
+    "tutorial": 14,
+    "title": "Registering Multiple Models in Admin",
+    "content": "To manage your new tables (Authors, Publishers, Stores), you must update your admin configuration.\n\n**Open myapp/admin.py:**\n\n```python\nfrom django.contrib import admin\nfrom .models import Book, Author, Publisher, Store\n\nadmin.site.register(Book)\nadmin.site.register(Author)\nadmin.site.register(Publisher)\nadmin.site.register(Store)\n```",
+    "order": 5
+  }
+},
+{
+  "model": "app.videostep",
+  "pk": 82,
+  "fields": {
+    "tutorial": 14,
+    "title": "Testing the Relationships in Admin",
+    "content": "When you log into the Admin panel now:\n\n1. Create an Author (e.g., \"John Doe\") and a Publisher (e.g., \"TechPress\").\n2. When you go to \"Add Book,\" you will see **Dropdown Menus** for the User and Publisher (ForeignKeys).\n3. You will see a **Multi-Select Box** for Authors and Stores (Many-to-Many), allowing you to pick multiple names for a single book.",
+    "order": 6
+  }
+},
+{
+  "model": "app.videostep",
+  "pk": 83,
+  "fields": {
+    "tutorial": 15,
+    "title": "Switching from Built-in Forms to Manual HTML",
+    "content": "Django’s `{{ form.as_p }}` is fast, but it can be hard to style. To build your own, you replace the Django variable with standard HTML `<input>`, `<select>`, and `<label>` tags.\n\n**The HTML Structure:**\nEach input must have a `name` attribute that matches the field name in your `models.py`.\n\n```html\n<form method=\"POST\">\n    {% csrf_token %}\n    <label for=\"title\">Book Title:</label>\n    <input type=\"text\" id=\"title\" name=\"title\">\n\n    <label for=\"body\">Description:</label>\n    <textarea id=\"body\" name=\"body\"></textarea>\n\n    <button type=\"submit\">Save</button>\n</form>\n```",
+    "order": 1
+  }
+},
+{
+  "model": "app.videostep",
+  "pk": 84,
+  "fields": {
+    "tutorial": 15,
+    "title": "Handling Foreign Key Dropdowns Manually",
+    "content": "For fields like \"User\" or \"Publisher\" (Foreign Keys), you need to provide the user with a list of existing options. This requires passing those objects from the view to the template.\n\n**The View Logic:**\nYou use `get_context_data` to fetch all users or publishers from the database.\n\n```python\ndef get_context_data(self, **kwargs):\n    context = super().get_context_data(**kwargs)\n    context['users'] = User.objects.all()\n    return context\n```\n\n**The HTML Loop:**\nIn your template, you loop through these objects to create a dropdown menu.\n\n```html\n<select name=\"user\">\n    {% for user in users %}\n        <option value=\"{{ user.id }}\">{{ user.username }}</option>\n    {% endfor %}\n</select>\n```",
+    "order": 2
+  }
+},
+{
+  "model": "app.videostep",
+  "pk": 85,
+  "fields": {
+    "tutorial": 15,
+    "title": "Handling Many-to-Many Selections",
+    "content": "For \"Authors,\" where a book can have multiple people, you use the `multiple` attribute in your HTML select tag.\n\n**The HTML Code:**\n\n```html\n<select name=\"author\" multiple>\n    {% for author in authors %}\n        <option value=\"{{ author.id }}\">{{ author.first_name }} {{ author.last_name }}</option>\n    {% endfor %}\n</select>\n```",
+    "order": 3
+  }
+},
+{
+  "model": "app.videostep",
+  "pk": 86,
+  "fields": {
+    "tutorial": 15,
+    "title": "Using Proper Input Types",
+    "content": "To ensure data quality, use specific HTML input types that match your Django field types:\n\n- **Price**: `<input type=\"number\">` (Prevents users from typing letters).\n- **Publication Date**: `<input type=\"date\">` (Triggers a built-in browser calendar).",
+    "order": 4
+  }
+},
+{
+  "model": "app.videostep",
+  "pk": 87,
+  "fields": {
+    "tutorial": 15,
+    "title": "Displaying Custom Validation Errors",
+    "content": "Because you aren't using Django's automatic form rendering, you must manually display errors if the user submits invalid data (e.g., leaving a required field blank).\n\n**The Error Loop:**\n\n```html\n{% for error in form.title.errors %}\n    <p style=\"color: red;\">{{ error }}</p>\n{% endfor %}\n```\nThis gives the user an immediate indicator of what they need to fix.",
+    "order": 5
+  }
+},
+{
+  "model": "app.videostep",
+  "pk": 88,
+  "fields": {
+    "tutorial": 15,
+    "title": "Why Use This Method?",
+    "content": "By using pure HTML tags instead of `{{ form }}`, you can:\n\n- Apply specific CSS classes to every single input.\n- Use frontend frameworks like Bootstrap or Tailwind more easily.\n- Customize the exact order and grouping of fields without touching Python code.",
+    "order": 6
+  }
+},
+{
+  "model": "app.videostep",
+  "pk": 89,
+  "fields": {
+    "tutorial": 16,
+    "title": "Organizing Data with HTML Tables",
+    "content": "Instead of a simple list, the video demonstrates how to display your database records in a structured HTML table. This makes it easier to view multiple fields (like price, rating, and author) side-by-side.\n\n**The Workflow:** You use a `{% for %}` loop to create a new `<tr>` (table row) for every book in your database.\n\n**Handling Relationships:** For Many-to-Many fields (like Authors), you must run a nested loop inside the table cell:\n\n```html\n<td>\n  {% for author in book.authors.all %}\n    {{ author.first_name }} {{ author.last_name }}{% if not forloop.last %}, {% endif %}\n  {% endfor %}\n</td>\n```",
+    "order": 1
+  }
+},
+{
+  "model": "app.videostep",
+  "pk": 90,
+  "fields": {
+    "tutorial": 16,
+    "title": "Implementing a Search Bar (Filtering)",
+    "content": "This is one of the most practical features. It allows users to type a keyword and filter the list to show only matching results.\n\n**The View Logic:** You capture the user's search query from the URL using `request.GET.get('q')`.\n\n**The Query:**\n\n```python\nquery = self.request.GET.get('q')\nif query:\n    object_list = Book.objects.filter(title__icontains=query)\n```\n*Note: `icontains` makes the search case-insensitive, so \"Python\" and \"python\" both work.*",
+    "order": 2
+  }
+},
+{
+  "model": "app.videostep",
+  "pk": 91,
+  "fields": {
+    "tutorial": 16,
+    "title": "Aggregating Data (Calculations)",
+    "content": "Aggregation allows you to get summary data from your entire database, such as the total number of books or the sum of all prices.\n\n**Counting Records**: Use the `.count()` method in your view to find the total number of items.\n\n**Summing Values**: Use Django's `Sum` function to calculate totals.\n\n```python\nfrom django.db.models import Sum\n\ntotal_price = Book.objects.aggregate(Sum('price'))\n```\n**Displaying in Templates**: These values are passed to the template via the context and usually displayed in the `<tfoot>` (table footer).",
+    "order": 3
+  }
+},
+{
+  "model": "app.videostep",
+  "pk": 92,
+  "fields": {
+    "tutorial": 16,
+    "title": "Ordering Data (Sorting)",
+    "content": "You can control the order in which items appear. For example, you might want the most recently published books to appear at the top of the list.\n\n**The Code:**\n\n```python\n# The '-' prefix means descending order (newest first)\nbooks = Book.objects.all().order_by('-publication_date')\n```",
+    "order": 4
+  }
+},
+{
+  "model": "app.videostep",
+  "pk": 93,
+  "fields": {
+    "tutorial": 16,
+    "title": "Handling \"No Results\" Found",
+    "content": "The video shows how to improve User Experience (UX) by using the `{% empty %}` tag. If a user searches for something that doesn't exist, instead of showing a blank table, you can display a message like \"No books found matching your search.\" ",
+    "order": 5
+  }
+},
+{
+  "model": "app.videostep",
+  "pk": 94,
+  "fields": {
+    "tutorial": 16,
+    "title": "Advanced Table Features: CRUD Links",
+    "content": "The video wraps up by adding functional links to each row in the table, connecting the View, Update, and Delete actions we learned in previous videos:\n\n```html\n<a href=\"{% url 'book-detail' book.pk %}\">View</a>\n<a href=\"{% url 'book-update' book.pk %}\">Edit</a>\n<a href=\"{% url 'book-delete' book.pk %}\">Delete</a>\n```\n\nThis final video ties everything together, transforming your basic setup into a dynamic, searchable, and data-aware application. You now have the full set of instructions for building and managing a Django project from setup to advanced querying!",
+    "order": 6
+  }
+},
+{
+  "model": "app.videostep",
+  "pk": 95,
+  "fields": {
+    "tutorial": 12,
+    "title": "Implementing the DeleteView",
+    "content": "The `DeleteView` is a built-in Class-Based View (CBV) that handles the logic of finding a specific object and removing it from the database.\n\n**Open myapp/views.py:**\nYou must specify the model to act upon and a `success_url` to redirect the user after the deletion is finished.\n\n```python\nfrom django.views.generic.edit import DeleteView\nfrom django.urls import reverse_lazy\nfrom .models import Book\n\nclass BookDeleteView(DeleteView):\n    model = Book\n    template_name = 'book_confirm_delete.html'\n    # reverse_lazy ensures the URL is loaded only after the deletion is done\n    success_url = reverse_lazy('book-list')\n```",
+    "order": 1
+  }
+},
+{
+  "model": "app.videostep",
+  "pk": 96,
+  "fields": {
+    "tutorial": 12,
+    "title": "Mapping the URL with a PK",
+    "content": "Because you are targeting a specific record, the URL must capture the unique Primary Key (`pk`) of that item.\n\n**Open myproject/urls.py:**\n\n```python\nfrom django.urls import path\nfrom myapp.views import BookDeleteView\n\nurlpatterns = [\n    # ... other paths ...\n    path('book/<int:pk>/delete/', BookDeleteView.as_view(), name='book-delete'),\n]\n```",
+    "order": 2
+  }
+},
+{
+  "model": "app.videostep",
+  "pk": 97,
+  "fields": {
+    "tutorial": 12,
+    "title": "Creating the Confirmation Template",
+    "content": "In the video, Django requires a `POST` request to actually delete data. This means you must create a specific HTML file that asks the user for confirmation.\n\n**Create templates/book_confirm_delete.html:**\n\n```html\n{% extends 'base.html' %}\n\n{% block content %}\n<h1>Delete Confirmation</h1>\n<p>Are you sure you want to delete <strong>\"{{ object.title }}\"</strong>?</p>\n\n<form method=\"POST\">\n    {% csrf_token %}\n    <button type=\"submit\">Confirm Delete</button>\n    <a href=\"{% url 'book-list' %}\">Cancel</a>\n</form>\n{% endblock %}\n```",
+    "order": 3
+  }
+},
+{
+  "model": "app.videostep",
+  "pk": 98,
+  "fields": {
+    "tutorial": 12,
+    "title": "Adding the Delete Button to your List",
+    "content": "To make the feature accessible, add a link in your main list table. Passing `book.pk` ensures Django knows which specific book you intend to remove.\n\n**Update templates/book_list.html:**\n\n```html\n{% for book in all_books %}\n    <tr>\n        <td>{{ book.title }}</td>\n        <td>\n            <a href=\"{% url 'book-delete' book.pk %}\" style=\"color: red;\">Delete</a>\n        </td>\n    </tr>\n{% endfor %}\n```",
+    "order": 4
+  }
+},
+{
+  "model": "app.videostep",
+  "pk": 99,
+  "fields": {
+    "tutorial": 12,
+    "title": "Workflow Check",
+    "content": "When you test this based on the video:\n\n1. **Click Delete**: You are sent to the `/delete/` URL (a GET request).\n2. **Confirmation Page**: Django renders the `book_confirm_delete.html` page.\n3. **Submit Form**: Clicking the button sends a POST request.\n4. **Final Action**: Django deletes the record and redirects you back to the list.",
+    "order": 5
+  }
+}
+]
