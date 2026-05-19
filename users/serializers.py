@@ -1,5 +1,6 @@
 # users/serializers.py
 from rest_framework import serializers
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
 from rest_framework.validators import UniqueValidator
@@ -8,6 +9,25 @@ from django.db import transaction
 from game_api.models import GameSave
 
 User = get_user_model()
+
+
+class EmailOrUsernameTokenObtainPairSerializer(TokenObtainPairSerializer):
+    """Allow website login with either email or username, ignoring email/username case."""
+
+    def validate(self, attrs):
+        login_value = attrs.get(self.username_field, "").strip()
+        password = attrs.get("password", "")
+
+        user = (
+            User.objects.filter(email__iexact=login_value).first()
+            or User.objects.filter(username__iexact=login_value).first()
+        )
+        if user:
+            attrs[self.username_field] = user.email
+        else:
+            attrs[self.username_field] = login_value
+        attrs["password"] = password
+        return super().validate(attrs)
 
 class ProfileSerializer(serializers.ModelSerializer):
     """Serializer for user profile data"""
@@ -403,17 +423,16 @@ class RegisterSerializer(serializers.ModelSerializer):
         role = validated_data.pop('role', 'student')
         validated_data.pop('educator_code', None)
         
-        user = User.objects.create(
-            username=validated_data['username'],
-            email=validated_data['email'],
+        user = User.objects.create_user(
+            username=validated_data['username'].strip(),
+            email=validated_data['email'].strip(),
+            password=validated_data['password'],
             first_name=validated_data.get('first_name', ''),
             last_name=validated_data.get('last_name', ''),
             is_teacher=(role == 'teacher'),
             is_student=(role == 'student'),
         )
-        user.set_password(validated_data['password'])
-        user.save()
-        
+
         Profile.objects.create(user=user)
         
         return user
