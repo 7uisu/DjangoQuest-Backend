@@ -275,6 +275,21 @@ class GameSaveTest(TestCase):
         self.assertEqual(resp.status_code, 400)
         self.assertIn('passing ch2_y1s1_final_grade', ' '.join(resp.json()['errors']))
 
+    def test_accept_removal_pass_without_retake_count(self):
+        """The game can mark a removal exam pass before incrementing retake counters."""
+        self._login()
+        payload = self._ch1_complete_payload()
+        payload.update({
+            'ch2_y1s1_teaching_done': True,
+            'ch2_y1s1_final_grade': 3.0,
+            'ch2_y1s1_removal_passed': True,
+            'ch2_y1s1_retake_count': 0,
+        })
+
+        resp = self.client.put(self.url, {'save_data': payload}, format='json')
+
+        self.assertEqual(resp.status_code, 200)
+
     def test_reject_regressing_synced_progress(self):
         """Already synced completion flags and counters cannot move backwards."""
         self._login()

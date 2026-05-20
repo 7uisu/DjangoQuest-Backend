@@ -57,7 +57,7 @@ def _call_groq(prompt, max_tokens=500, temperature=0.5):
             print(f"[Groq] ❌ Exception with {model_name}: {e}")
     return None
 
-# Judge0 Language IDs
+# Legacy Judge0 settings kept only for compatibility; active validation does not call Judge0.
 JUDGE0_LANGUAGES = {
     'python': 71,     # Python 3.8.1
     'html': None,     # Not executed — validated via string matching
@@ -521,12 +521,8 @@ class GameSaveView(APIView):
                     pass
 
             if save_data.get(removal_key, False):
-                try:
-                    retake_count = int(save_data.get(retake_key, 0) or 0)
-                except (ValueError, TypeError):
-                    retake_count = 0
-                if retake_count <= 0:
-                    errors.append(f'{removal_key} requires at least one retake in {retake_key}.')
+                if not save_data.get(done_key, False):
+                    errors.append(f'{removal_key} requires {done_key} to be completed.')
 
         # Thesis completion requires all professor modules and panelists.
         if save_data.get('thesis_completed', False):
@@ -802,8 +798,8 @@ class GameCheckCodeView(APIView):
 
     def _execute_judge0(self, code, language):
         """
-        Tier 2: Send code to Judge0 Docker container for safe execution.
-        Returns the stdout/stderr output.
+        Deprecated legacy helper. The active Godot workflow no longer calls
+        Judge0/Docker execution; it uses controlled validation and AI hints.
         """
         import base64
 
