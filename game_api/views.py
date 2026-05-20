@@ -383,7 +383,8 @@ class GameSaveView(APIView):
         # 7. Validate retake counts (0–10)
         retake_keys = [
             k for k in save_data
-            if k.endswith('_retake_count') or k.endswith('_retakes')
+            if (k.endswith('_retake_count') or k.endswith('_retakes'))
+            and k not in GameSaveView.DICT_KEYS
         ]
         for key in retake_keys:
             val = save_data.get(key)
