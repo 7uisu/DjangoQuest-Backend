@@ -77,8 +77,8 @@ class StudentSerializer(serializers.ModelSerializer):
             ("Professor Syntax", "ch2_y1s2"),
             ("Professor View", "ch2_y2s1"),
             ("Professor Query", "ch2_y2s2"),
-            ("Professor Auth", "ch2_y3s1"),
-            ("Professor Token", "ch2_y3s2"),
+            ("Professor Token", "ch2_y3s1"),
+            ("Professor Auth", "ch2_y3s2"),
             ("Professor REST", "ch2_y3mid"),
         ]
         
@@ -122,7 +122,7 @@ class StudentSerializer(serializers.ModelSerializer):
                         "ai_url_routing_skipped": sd.get("ch2_y2s1_ai_url_routing_skipped", False),
                         "ai_fully_offline": sd.get("ch2_y2s1_ai_fully_offline", False)
                     }
-                elif prefix == "ch2_y3s1":
+                elif prefix == "ch2_y3s2":
                     prof_data["ai_data"] = {
                         "ai_auth_checker_skipped": sd.get("ch2_y3s2_ai_auth_checker_skipped", False),
                         "ai_fully_offline": sd.get("ch2_y3s2_ai_fully_offline", False)
@@ -318,4 +318,3 @@ class ClassroomDetailSerializer(serializers.ModelSerializer):
         profiles = obj.students.select_related('user').all()
         users = [p.user for p in profiles]
         return StudentSerializer(users, many=True).data
-
