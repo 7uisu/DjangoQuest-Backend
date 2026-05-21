@@ -75,6 +75,9 @@ class UserSerializer(serializers.ModelSerializer):
     story_mode_gwa = serializers.SerializerMethodField()
     learning_mode_gwa = serializers.SerializerMethodField()
     learning_mode_detailed_grades = serializers.SerializerMethodField()
+    thesis_gwa = serializers.SerializerMethodField()
+    complete_gwa = serializers.SerializerMethodField()
+    thesis_status = serializers.SerializerMethodField()
     certificates = serializers.SerializerMethodField()
     
     class Meta:
@@ -82,6 +85,7 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ['id', 'username', 'email', 'first_name', 'last_name', 'is_verified', 'is_teacher', 'is_student', 'is_staff', 'is_superuser', 'date_joined', 'profile', 'achievements',
                   'story_progress', 'challenges_completed', 'learning_modules_completed',
                   'ch1_quiz_score', 'ch1_did_remedial', 'ch1_remedial_score', 'detailed_grades', 'story_mode_gwa', 'learning_mode_gwa', 'learning_mode_detailed_grades',
+                  'thesis_gwa', 'complete_gwa', 'thesis_status',
                   'certificates']
         read_only_fields = ['id', 'is_verified', 'is_teacher', 'is_student', 'is_staff', 'is_superuser', 'date_joined']
 
@@ -117,8 +121,8 @@ class UserSerializer(serializers.ModelSerializer):
             ("Professor Syntax", "ch2_y1s2"),
             ("Professor View", "ch2_y2s1"),
             ("Professor Query", "ch2_y2s2"),
-            ("Professor Auth", "ch2_y3s1"),
-            ("Professor Token", "ch2_y3s2"),
+            ("Professor Token", "ch2_y3s1"),
+            ("Professor Auth", "ch2_y3s2"),
             ("Professor REST", "ch2_y3mid"),
         ]
         not_attempted = [
@@ -171,7 +175,7 @@ class UserSerializer(serializers.ModelSerializer):
                     "ai_url_routing_skipped": sd.get("ch2_y2s1_ai_url_routing_skipped", False),
                     "ai_fully_offline": sd.get("ch2_y2s1_ai_fully_offline", False)
                 }
-            elif prefix == "ch2_y3s1":
+            elif prefix == "ch2_y3s2":
                 prof_data["ai_data"] = {
                     "ai_auth_checker_skipped": sd.get("ch2_y3s2_ai_auth_checker_skipped", False),
                     "ai_fully_offline": sd.get("ch2_y3s2_ai_fully_offline", False)
@@ -223,6 +227,57 @@ class UserSerializer(serializers.ModelSerializer):
                 continue
         return round(total / count, 2) if count > 0 else 0.0
 
+    def get_thesis_gwa(self, obj) -> float:
+        game_save = getattr(obj, 'game_save', None)
+        if not game_save:
+            return 0.0
+        sd = game_save.save_data
+        if not isinstance(sd, dict):
+            return 0.0
+
+        total, count = 0.0, 0
+        for prefix in ["thesis_panelist_1", "thesis_panelist_2", "thesis_panelist_3"]:
+            try:
+                grade = float(sd.get(f"{prefix}_grade", 0.0))
+                if grade > 0.0:
+                    total += grade
+                    count += 1
+            except (ValueError, TypeError):
+                continue
+        return round(total / count, 2) if count > 0 else 0.0
+
+    def get_complete_gwa(self, obj) -> float:
+        game_save = getattr(obj, 'game_save', None)
+        if not game_save:
+            return 0.0
+        sd = game_save.save_data
+        if not isinstance(sd, dict):
+            return 0.0
+
+        values = []
+        for prefix in ["ch2_y1s1", "ch2_y1s2", "ch2_y2s1", "ch2_y2s2", "ch2_y3s1", "ch2_y3s2", "ch2_y3mid"]:
+            try:
+                grade = float(sd.get(f"{prefix}_final_grade", 0.0))
+                if grade > 0.0:
+                    values.append(grade)
+            except (ValueError, TypeError):
+                continue
+
+        thesis_gwa = self.get_thesis_gwa(obj)
+        if sd.get("thesis_completed", False) and thesis_gwa > 0.0:
+            values.append(thesis_gwa)
+
+        return round(sum(values) / len(values), 2) if values else 0.0
+
+    def get_thesis_status(self, obj) -> dict:
+        game_save = getattr(obj, 'game_save', None)
+        sd = game_save.save_data if game_save and isinstance(game_save.save_data, dict) else {}
+        return {
+            "progress": sd.get("thesis_panelist_progress", 0),
+            "completed": sd.get("thesis_completed", False),
+            "completed_at": sd.get("thesis_completed_at", ""),
+        }
+
     def get_learning_mode_detailed_grades(self, obj) -> list:
         professors = [
             ("Professor Markup", "markup"),
@@ -257,8 +312,8 @@ class UserSerializer(serializers.ModelSerializer):
         ("y1s2", "Professor Syntax", "Python Data Types"),
         ("y2s1", "Professor View", "Django Views & URL Routing"),
         ("y2s2", "Professor Query", "Django ORM & Relationships"),
-        ("y3s1", "Professor Auth", "Authentication & Security"),
-        ("y3s2", "Professor Token", "Token-Based Auth"),
+        ("y3s1", "Professor Token", "Token-Based Auth"),
+        ("y3s2", "Professor Auth", "Authentication & Security"),
         ("y3mid", "Professor REST", "RESTful API Design"),
     ]
 

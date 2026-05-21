@@ -27,8 +27,8 @@ PROFESSOR_CERTS = [
     ("y1s2", "Professor Syntax", "Python Data Types"),
     ("y2s1", "Professor View", "Django Views & URL Routing"),
     ("y2s2", "Professor Query", "Django ORM & Relationships"),
-    ("y3s1", "Professor Auth", "Authentication & Security"),
-    ("y3s2", "Professor Token", "Token-Based Auth"),
+    ("y3s1", "Professor Token", "Token-Based Auth"),
+    ("y3s2", "Professor Auth", "Authentication & Security"),
     ("y3mid", "Professor REST", "RESTful API Design"),
 ]
 PROFESSOR_MAP = {key: (name, topic) for key, name, topic in PROFESSOR_CERTS}

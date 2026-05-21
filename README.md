@@ -1,12 +1,14 @@
 # DjangoQuest Backend
 
-This is the Django REST Framework backend for the DjangoQuest platform. It handles user authentication, cloud saves, achievements, video tutorials, and admin management.
+This is the Django REST Framework backend for the DjangoQuest platform. It handles user authentication, cloud saves, achievements, video tutorials, admin management, controlled coding challenge validation, and AI-assisted feedback.
+
+In production, this backend is hosted on Render and connects to a Render PostgreSQL database. Judge0 is no longer part of the active system; coding challenges use local/controlled validation, Python AST syntax checks, and Gemini/Groq AI assistance instead of remote code execution.
 
 ## How the Projects Connect
 This platform has three main parts that work together:
-1. **Backend (This Repository)**: The core database and server. It controls the logins, saves, and data.
+1. **Backend (This Repository)**: The Render-hosted API service. It controls logins, saves, classroom data, content records, and validation requests.
 2. **[Frontend Web Portal](https://github.com/7uisu/DjangoQuest-Frontend.git)**: The website where students can see their progress and teachers can manage classes.
-3. **[Godot Game Client](https://github.com/7uisu/djangoquest_capstone_godot_project_revision.git)**: The 3D game. Players download this to actually play the coding game.
+3. **[Godot Game Client](https://github.com/7uisu/djangoquest_capstone_godot_project_revision.git)**: The 2D top-down RPG game. Players download this to actually play the coding game.
 
 ## Prerequisites
 - Python 3.10+

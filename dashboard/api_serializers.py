@@ -260,11 +260,29 @@ class StudentSerializer(serializers.ModelSerializer):
             return 0.0
 
     def get_complete_gwa(self, obj) -> float:
-        """Average of story_mode_gwa and thesis_gwa (both must be > 0)."""
-        story_gwa = self.get_story_mode_gwa(obj)
-        thesis_gwa = self.get_thesis_gwa(obj)
-        values = [v for v in [story_gwa, thesis_gwa] if v > 0]
-        return round(sum(values) / len(values), 2) if values else 0.0
+        """Academic GWA: each story professor plus the completed thesis as one subject."""
+        professors = ["ch2_y1s1", "ch2_y1s2", "ch2_y2s1", "ch2_y2s2", "ch2_y3s1", "ch2_y3s2", "ch2_y3mid"]
+        try:
+            sd = obj.game_save.save_data
+            if not isinstance(sd, dict):
+                return 0.0
+
+            values = []
+            for prefix in professors:
+                try:
+                    grade = float(sd.get(f"{prefix}_final_grade", 0.0))
+                    if grade > 0.0:
+                        values.append(grade)
+                except (ValueError, TypeError):
+                    continue
+
+            thesis_gwa = self.get_thesis_gwa(obj)
+            if sd.get("thesis_completed", False) and thesis_gwa > 0.0:
+                values.append(thesis_gwa)
+
+            return round(sum(values) / len(values), 2) if values else 0.0
+        except GameSave.DoesNotExist:
+            return 0.0
 
     def get_thesis_status(self, obj) -> dict:
         try:
