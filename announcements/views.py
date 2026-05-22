@@ -33,8 +33,12 @@ class AnnouncementListCreateView(generics.ListCreateAPIView):
         elif user.is_student:
             # Students see classroom announcements for their enrolled classroom
             profile = getattr(user, 'profile', None)
-            if profile and profile.classroom:
-                q |= Q(announcement_type='classroom', target_classrooms=profile.classroom)
+            if profile:
+                classroom_ids = list(profile.classrooms.values_list('id', flat=True))
+                if profile.classroom_id and profile.classroom_id not in classroom_ids:
+                    classroom_ids.append(profile.classroom_id)
+                if classroom_ids:
+                    q |= Q(announcement_type='classroom', target_classrooms__id__in=classroom_ids)
 
         return Announcement.objects.filter(q).prefetch_related('target_classrooms').select_related('author').distinct()
 

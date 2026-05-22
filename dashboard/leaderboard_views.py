@@ -7,7 +7,7 @@ GET /api/dashboard/classroom-rankings/  (teacher only)
 from rest_framework import permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from django.db.models import Count
+from django.db.models import Count, Q
 from django.contrib.auth import get_user_model
 from users.models import Classroom
 
@@ -24,6 +24,7 @@ class LeaderboardView(APIView):
 
     def get(self, request):
         scope = request.query_params.get('scope', 'classroom')
+        classroom_id = request.query_params.get('classroom_id')
 
         qs = User.objects.filter(
             is_student=True,
@@ -34,9 +35,22 @@ class LeaderboardView(APIView):
         )
 
         if scope == 'classroom':
-            classroom = getattr(request.user.profile, 'classroom', None) if hasattr(request.user, 'profile') else None
+            classroom = None
+            profile = getattr(request.user, 'profile', None)
+            if classroom_id:
+                classroom = Classroom.objects.filter(id=classroom_id).first()
+                if classroom and not (
+                    request.user.is_teacher and classroom.teacher_id == request.user.id
+                    or profile and (
+                        profile.classroom_id == classroom.id
+                        or profile.classrooms.filter(id=classroom.id).exists()
+                    )
+                ):
+                    return Response({'scope': 'classroom', 'entries': []})
+            else:
+                classroom = getattr(profile, 'classroom', None) if profile else None
             if classroom:
-                qs = qs.filter(profile__classroom=classroom)
+                qs = qs.filter(Q(profile__classroom=classroom) | Q(profile__classrooms=classroom)).distinct()
             else:
                 # Not enrolled — return empty
                 return Response({'scope': 'classroom', 'entries': []})
@@ -91,7 +105,9 @@ class ClassroomRankingsView(APIView):
         rankings = []
 
         for classroom in classrooms:
-            profiles = classroom.students.select_related('user').all()
+            profiles = classroom.enrolled_profiles.select_related('user').all()
+            legacy_profiles = classroom.students.select_related('user').exclude(id__in=profiles.values_list('id', flat=True))
+            profiles = list(profiles) + list(legacy_profiles)
             users = [p.user for p in profiles]
             student_count = len(users)
 

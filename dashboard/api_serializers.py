@@ -1,6 +1,7 @@
 # dashboard/api_serializers.py
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
+from django.db import models
 from users.models import Classroom, Profile, UserAchievement
 from game_api.models import GameSave
 
@@ -316,7 +317,7 @@ class ClassroomSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'enrollment_code', 'created_at']
 
     def get_student_count(self, obj) -> int:
-        return obj.students.count()
+        return Profile.objects.filter(models.Q(classroom=obj) | models.Q(classrooms=obj)).distinct().count()
 
 
 class ClassroomDetailSerializer(serializers.ModelSerializer):
@@ -330,9 +331,9 @@ class ClassroomDetailSerializer(serializers.ModelSerializer):
         read_only_fields = fields
 
     def get_student_count(self, obj) -> int:
-        return obj.students.count()
+        return Profile.objects.filter(models.Q(classroom=obj) | models.Q(classrooms=obj)).distinct().count()
 
     def get_students(self, obj):
-        profiles = obj.students.select_related('user').all()
+        profiles = Profile.objects.filter(models.Q(classroom=obj) | models.Q(classrooms=obj)).select_related('user').distinct()
         users = [p.user for p in profiles]
         return StudentSerializer(users, many=True).data

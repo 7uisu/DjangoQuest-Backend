@@ -131,6 +131,7 @@ class GameEnrollView(APIView):
             )
 
         profile, _ = Profile.objects.get_or_create(user=request.user)
+        profile.classrooms.add(classroom)
         profile.classroom = classroom
         profile.save()
 
@@ -149,15 +150,33 @@ class GameUnenrollView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request):
-        if not hasattr(request.user, 'profile') or not request.user.profile.classroom:
+        profile = getattr(request.user, 'profile', None)
+        if not profile:
             return Response(
                 {"detail": "You are not enrolled in any classroom."},
                 status=status.HTTP_400_BAD_REQUEST
             )
-            
-        classroom_name = request.user.profile.classroom.name
-        request.user.profile.classroom = None
-        request.user.profile.save()
+
+        classroom_id = request.data.get('classroom_id')
+        classroom = None
+        if classroom_id:
+            classroom = profile.classrooms.filter(id=classroom_id).first()
+        elif profile.classroom:
+            classroom = profile.classroom
+        elif profile.classrooms.exists():
+            classroom = profile.classrooms.first()
+
+        if classroom is None:
+            return Response(
+                {"detail": "You are not enrolled in any classroom."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        classroom_name = classroom.name
+        profile.classrooms.remove(classroom)
+        if profile.classroom_id == classroom.id:
+            profile.classroom = profile.classrooms.first()
+        profile.save()
         
         return Response({"detail": f"Successfully unenrolled from {classroom_name}."}, status=status.HTTP_200_OK)
 

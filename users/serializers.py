@@ -33,17 +33,31 @@ class ProfileSerializer(serializers.ModelSerializer):
     """Serializer for user profile data"""
     classroom_name = serializers.SerializerMethodField()
     teacher_name = serializers.SerializerMethodField()
+    classrooms = serializers.SerializerMethodField()
 
     class Meta:
         model = Profile
-        fields = ['avatar', 'bio', 'total_xp', 'classroom_name', 'teacher_name']
-        read_only_fields = ['total_xp', 'classroom_name', 'teacher_name']
+        fields = ['avatar', 'bio', 'total_xp', 'classroom_name', 'teacher_name', 'classrooms']
+        read_only_fields = ['total_xp', 'classroom_name', 'teacher_name', 'classrooms']
 
     def get_classroom_name(self, obj):
         return obj.classroom.name if obj.classroom else None
         
     def get_teacher_name(self, obj):
         return obj.classroom.teacher.username if obj.classroom else None
+
+    def get_classrooms(self, obj):
+        memberships = list(obj.classrooms.select_related('teacher').all())
+        if obj.classroom and obj.classroom not in memberships:
+            memberships.append(obj.classroom)
+        return [
+            {
+                "id": classroom.id,
+                "name": classroom.name,
+                "teacher": classroom.teacher.username,
+            }
+            for classroom in memberships
+        ]
 
 class AchievementSerializer(serializers.ModelSerializer):
     """Serializer for achievements"""

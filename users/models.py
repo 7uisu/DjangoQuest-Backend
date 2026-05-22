@@ -122,6 +122,12 @@ class Profile(models.Model):
         db_index=True,  # indexed: "students in classroom X" queries are O(log n)
         help_text='The classroom this student is enrolled in.',
     )
+    classrooms = models.ManyToManyField(
+        Classroom,
+        blank=True,
+        related_name='enrolled_profiles',
+        help_text='All classrooms this student is enrolled in.',
+    )
 
     def save(self, *args, **kwargs):
         # Delete old avatar file when a new one is uploaded
