@@ -59,6 +59,23 @@ class ProfileSerializer(serializers.ModelSerializer):
             for classroom in memberships
         ]
 
+    def to_representation(self, obj):
+        rep = super().to_representation(obj)
+        avatar = getattr(obj, 'avatar', None)
+        if avatar:
+            try:
+                avatar_url = avatar.url
+            except ValueError:
+                avatar_url = None
+            if avatar_url:
+                if not avatar_url.startswith(('http://', 'https://', '/')):
+                    avatar_url = '/' + avatar_url
+                request = self.context.get('request')
+                if request and not avatar_url.startswith(('http://', 'https://')):
+                    avatar_url = request.build_absolute_uri(avatar_url)
+                rep['avatar'] = avatar_url
+        return rep
+
 class AchievementSerializer(serializers.ModelSerializer):
     """Serializer for achievements"""
     class Meta:
@@ -385,6 +402,18 @@ class UserProfileUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['first_name', 'last_name', 'profile']
+
+    def to_internal_value(self, data):
+        if hasattr(data, 'copy'):
+            data = data.copy()
+        profile_data = {}
+        for field in ('bio', 'avatar'):
+            dotted_key = f'profile.{field}'
+            if dotted_key in data:
+                profile_data[field] = data.get(dotted_key)
+        if profile_data:
+            data['profile'] = profile_data
+        return super().to_internal_value(data)
     
     def update(self, instance, validated_data):
         profile_data = validated_data.pop('profile', None)

@@ -1,6 +1,6 @@
 # dashboard/leaderboard_views.py
 """
-Leaderboard API — ranked list of students by XP.
+Leaderboard API — ranked list of students by progress, then XP.
 GET /api/dashboard/leaderboard/?scope=classroom|global
 GET /api/dashboard/classroom-rankings/  (teacher only)
 """
@@ -16,7 +16,7 @@ User = get_user_model()
 
 class LeaderboardView(APIView):
     """
-    Returns a ranked list of students sorted by total_xp descending.
+    Returns a ranked list of students sorted by story progress first, then XP.
     Query params:
       - scope: 'classroom' (default) or 'global'
     """
@@ -31,7 +31,7 @@ class LeaderboardView(APIView):
             profile__isnull=False,
             game_save__isnull=False,
         ).select_related('profile', 'game_save').annotate(
-            achievements_count=Count('achievements')
+            achievements_count=Count('achievements', distinct=True)
         )
 
         if scope == 'classroom':
@@ -55,7 +55,13 @@ class LeaderboardView(APIView):
                 # Not enrolled — return empty
                 return Response({'scope': 'classroom', 'entries': []})
 
-        qs = qs.order_by('-profile__total_xp')[:50]
+        qs = qs.order_by(
+            '-game_save__story_progress_percent',
+            '-profile__total_xp',
+            '-achievements_count',
+            'date_joined',
+            'id',
+        )[:50]
 
         entries = []
         for rank, user in enumerate(qs, start=1):
@@ -141,5 +147,5 @@ class ClassroomRankingsView(APIView):
                 'total_achievements': total_achievements,
             })
 
-        rankings.sort(key=lambda x: x['avg_xp'], reverse=True)
+        rankings.sort(key=lambda x: (x['avg_progress'], x['avg_xp'], x['total_achievements']), reverse=True)
         return Response({'rankings': rankings})

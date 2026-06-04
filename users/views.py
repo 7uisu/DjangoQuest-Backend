@@ -216,12 +216,12 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
-        serializer = UserProfileUpdateSerializer(instance, data=request.data, partial=partial)
+        serializer = UserProfileUpdateSerializer(instance, data=request.data, partial=partial, context={'request': request})
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
         
         # Return the full user data using UserSerializer
-        return Response(UserSerializer(instance).data)
+        return Response(UserSerializer(instance, context={'request': request}).data)
 
 # users/views.py
 class LogoutView(APIView):
