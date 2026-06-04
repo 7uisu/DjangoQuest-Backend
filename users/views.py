@@ -1,5 +1,6 @@
 # users/views.py
 from rest_framework import generics, status, permissions, viewsets
+from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.views import TokenObtainPairView
@@ -205,6 +206,7 @@ class EmailOrUsernameTokenObtainPairView(TokenObtainPairView):
 class UserProfileView(generics.RetrieveUpdateAPIView):
     serializer_class = UserSerializer
     permission_classes = [permissions.IsAuthenticated]
+    parser_classes = [JSONParser, FormParser, MultiPartParser]
     
     def get_object(self):
         return User.objects.select_related(
