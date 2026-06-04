@@ -723,6 +723,16 @@ class GameCheckCodeView(APIView):
         # ── Tier 2: Judge0 Removed for Godot Game ──
         judge0_output = None
 
+        pattern_hint = self._fallback_code_hint(code, expected_answers, local_message, hint_context)
+        if hint_mode and expected_answers and self._is_specific_hint(pattern_hint):
+            return Response({
+                'success': False,
+                'output': local_message,
+                'ai_hint': pattern_hint,
+                'judge0_output': '',
+                'ai_hint_source': 'local-pattern',
+            })
+
         # ── Tier 3: Gemini AI hint (if API key is set) ──
         ai_hint = None
         ai_hint_source = 'local'
@@ -734,7 +744,7 @@ class GameCheckCodeView(APIView):
             )
             print(f"[check-code] Gemini done: {str(ai_hint)[:80]}")
         if not ai_hint:
-            ai_hint = self._fallback_code_hint(code, expected_answers, local_message, hint_context)
+            ai_hint = pattern_hint
             ai_hint_source = 'local'
 
         # Build the response
@@ -1046,7 +1056,20 @@ Your conversational hint:"""
         if html_hint:
             return html_hint
 
+        css_hint = self._build_css_hint(student, answer)
+        if css_hint:
+            return css_hint
+
         return self._build_local_diff_hint(student, answer)
+
+    def _is_specific_hint(self, hint):
+        if not hint:
+            return False
+        generic_starts = (
+            "Check the task instructions",
+            "You are close. Compare capitalization",
+        )
+        return not any(str(hint).startswith(prefix) for prefix in generic_starts)
 
     def _build_html_hint(self, student, answer):
         """Give structure-aware hints for HTML snippets before using raw text diff."""
@@ -1148,6 +1171,44 @@ Your conversational hint:"""
             return f"Your {label} tag is opened with `<{tag}>` but not closed; the ending tag should be `</{tag}>`."
         return ''
 
+    def _build_css_hint(self, student, answer):
+        student_decls = self._extract_css_declarations(student)
+        answer_decls = self._extract_css_declarations(answer)
+        if not student_decls or not answer_decls:
+            return ''
+
+        from difflib import SequenceMatcher
+
+        for prop, expected_value in answer_decls.items():
+            if prop in student_decls:
+                actual_value = student_decls[prop]
+                if self._compact_css_value(actual_value) != self._compact_css_value(expected_value):
+                    return f"For `{prop}`, you wrote `{actual_value}`, but the value should be `{expected_value}`."
+                continue
+
+            close_prop = ''
+            close_ratio = 0.0
+            for actual_prop in student_decls.keys():
+                ratio = SequenceMatcher(None, actual_prop, prop).ratio()
+                if ratio > close_ratio:
+                    close_prop = actual_prop
+                    close_ratio = ratio
+
+            if close_ratio >= 0.72:
+                return f"You wrote the CSS property `{close_prop}`, but it should be `{prop}`."
+            return f"You are missing the CSS property `{prop}: {expected_value};`."
+
+        return ''
+
+    def _extract_css_declarations(self, text):
+        declarations = {}
+        for match in re.finditer(r'([a-zA-Z-]+)\s*:\s*([^;{}\n]+)\s*;?', str(text or '')):
+            declarations[match.group(1).strip().lower()] = match.group(2).strip()
+        return declarations
+
+    def _compact_css_value(self, value):
+        return re.sub(r'\s+', '', str(value or '')).lower()
+
     def _extract_hint_student_text(self, code):
         if isinstance(code, dict):
             return json.dumps(code, indent=2, sort_keys=True)
@@ -1196,7 +1257,7 @@ Your conversational hint:"""
     def _build_local_diff_hint(self, student, answer):
         from difflib import SequenceMatcher
 
-        student_clean = student.strip()
+        student_clean = self._select_relevant_student_snippet(student, answer)
         answer_clean = answer.strip()
         matcher = SequenceMatcher(None, student_clean, answer_clean)
 
@@ -1205,18 +1266,43 @@ Your conversational hint:"""
                 continue
             student_piece = student_clean[i1:i2]
             answer_piece = answer_clean[j1:j2]
-            before = answer_clean[max(0, j1 - 12):j1]
-            after = answer_clean[j2:j2 + 12]
-            location = f"near `{before}{answer_piece}{after}`".replace("\n", "\\n")
+            student_before = student_clean[max(0, i1 - 16):i1]
+            answer_before = answer_clean[max(0, j1 - 16):j1]
+            answer_after = answer_clean[j2:j2 + 16]
 
             if tag == 'insert':
-                return f"You are missing `{answer_piece}` {location}. Add that exact text in the matching spot."
+                where = f" after `{answer_before}`" if answer_before else ""
+                return f"You are missing `{answer_piece}`{where}. Add that exact text before continuing."
             if tag == 'delete':
-                return f"`{student_piece}` looks extra compared with the expected pattern. Remove that part and keep the surrounding code tight."
+                where = f" after `{student_before}`" if student_before else ""
+                return f"`{student_piece}` looks extra{where}. Remove that part and keep the required code only."
             if tag == 'replace':
-                return f"You wrote `{student_piece}`, but this spot should be `{answer_piece}` {location}."
+                context = f" near `{answer_before}{answer_piece}{answer_after}`".replace("\n", "\\n")
+                return f"You wrote `{student_piece}`, but this spot should be `{answer_piece}`{context}."
 
         return "You are close. Compare capitalization, spelling, punctuation, quotes, and spacing with the task pattern."
+
+    def _select_relevant_student_snippet(self, student, answer):
+        student_clean = str(student or '').strip()
+        answer_clean = str(answer or '').strip()
+        if not student_clean or not answer_clean:
+            return student_clean
+
+        if len(student_clean) <= max(len(answer_clean) * 3, 160):
+            return student_clean
+
+        from difflib import SequenceMatcher
+
+        lines = [line.strip() for line in student_clean.splitlines() if line.strip()]
+        best_line = ''
+        best_ratio = 0.0
+        for line in lines:
+            ratio = SequenceMatcher(None, line, answer_clean).ratio()
+            if ratio > best_ratio:
+                best_line = line
+                best_ratio = ratio
+
+        return best_line if best_ratio >= 0.35 else student_clean
 
 
 # ═════════════════════════════════════════════════════════════════════════════
