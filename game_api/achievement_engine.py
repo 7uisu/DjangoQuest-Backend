@@ -12,6 +12,15 @@ from users.models import Achievement, UserAchievement
 
 PROFESSOR_PREFIXES = ["y1s1", "y1s2", "y2s1", "y2s2", "y3s1", "y3s2", "y3mid"]
 
+BASE_XP_RULES = {
+    "shs_professor": 5,
+    "spaghetti_guy": 5,
+    "professor": 5,
+    "student_help": 1,
+    "panelist": 5,
+    "thesis_completed": 5,
+}
+
 
 def _all_profs_done(sd: dict) -> bool:
     return all(sd.get(f"ch2_{p}_teaching_done", False) for p in PROFESSOR_PREFIXES)
@@ -42,7 +51,49 @@ def _student_help_total(sd: dict) -> int:
     seq = sd.get("student_seq_progress", {})
     if not isinstance(seq, dict):
         return 0
-    return sum(int(v) for v in seq.values())
+    total = 0
+    for value in seq.values():
+        try:
+            total += int(value)
+        except (TypeError, ValueError):
+            continue
+    return total
+
+
+def compute_base_progress_xp(sd: dict) -> int:
+    """
+    Deterministic non-achievement XP from core game progress.
+    A full main-story clear is 100 base XP before achievement bonuses.
+    """
+    if not isinstance(sd, dict):
+        return 0
+
+    xp = 0
+
+    if sd.get("ch1_teaching_done", False):
+        xp += BASE_XP_RULES["shs_professor"]
+
+    if sd.get("ch1_spaghetti_guy_cutscene_done", False):
+        xp += BASE_XP_RULES["spaghetti_guy"]
+
+    xp += sum(
+        BASE_XP_RULES["professor"]
+        for prefix in PROFESSOR_PREFIXES
+        if sd.get(f"ch2_{prefix}_teaching_done", False)
+    )
+
+    xp += min(_student_help_total(sd), 35) * BASE_XP_RULES["student_help"]
+
+    try:
+        panelist_progress = int(sd.get("thesis_panelist_progress", 0) or 0)
+    except (TypeError, ValueError):
+        panelist_progress = 0
+    xp += max(0, min(panelist_progress, 3)) * BASE_XP_RULES["panelist"]
+
+    if sd.get("thesis_completed", False):
+        xp += BASE_XP_RULES["thesis_completed"]
+
+    return xp
 
 
 ACHIEVEMENT_CONDITIONS = [
@@ -113,6 +164,7 @@ def check_achievements(user, save_data: dict) -> list[str]:
     # Load all achievement definitions from DB
     all_achievements = {a.key: a for a in Achievement.objects.all()}
     if not all_achievements:
+        sync_profile_xp(user, save_data)
         return []
 
     # Already-unlocked keys for this user
@@ -141,21 +193,33 @@ def check_achievements(user, save_data: dict) -> list[str]:
         except Exception:
             continue  # Don't crash save on bad achievement data
 
-    sync_profile_xp(user)
+    sync_profile_xp(user, save_data)
     return newly_unlocked
 
 
-def sync_profile_xp(user) -> int:
-    """Keep profile XP equal to the user's earned achievement rewards."""
+def get_unlocked_achievement_keys(user) -> list[str]:
+    return list(
+        UserAchievement.objects
+        .filter(user=user)
+        .order_by('date_unlocked', 'id')
+        .values_list('achievement__key', flat=True)
+    )
+
+
+def sync_profile_xp(user, save_data=None) -> int:
+    """Keep profile XP equal to base progress XP plus achievement rewards."""
     if not hasattr(user, 'profile'):
         return 0
 
-    total = sum(
+    achievement_xp = sum(
         UserAchievement.objects
         .filter(user=user)
         .select_related('achievement')
         .values_list('achievement__xp_reward', flat=True)
     )
+    base_xp = compute_base_progress_xp(save_data or {})
+    total = int(base_xp + achievement_xp)
+
     if user.profile.total_xp != total:
         user.profile.total_xp = total
         user.profile.save(update_fields=['total_xp'])

@@ -4,6 +4,7 @@ from django.test import TestCase
 from rest_framework.test import APIClient
 from django.contrib.auth import get_user_model
 from users.models import Achievement, Profile, Classroom
+from .achievement_engine import compute_base_progress_xp
 
 User = get_user_model()
 
@@ -252,7 +253,32 @@ class GameSaveTest(TestCase):
         self.assertEqual(data['challenges_completed'], 12)
         self.assertEqual(data['learning_modules_completed'], 2)
 
-    def test_save_recalculates_xp_from_earned_achievements(self):
+    def test_base_progress_xp_reaches_100_for_full_story_clear(self):
+        payload = self._ch1_complete_payload()
+        payload.update({
+            'ch2_y1s1_teaching_done': True,
+            'ch2_y1s2_teaching_done': True,
+            'ch2_y2s1_teaching_done': True,
+            'ch2_y2s2_teaching_done': True,
+            'ch2_y3s1_teaching_done': True,
+            'ch2_y3s2_teaching_done': True,
+            'ch2_y3mid_teaching_done': True,
+            'student_seq_progress': {
+                'y1s1': 5,
+                'y1s2': 5,
+                'y2s1': 5,
+                'y2s2': 5,
+                'y3s1': 5,
+                'y3s2': 5,
+                'y3mid': 5,
+            },
+            'thesis_panelist_progress': 3,
+            'thesis_completed': True,
+        })
+
+        self.assertEqual(compute_base_progress_xp(payload), 100)
+
+    def test_save_recalculates_xp_from_progress_and_achievements(self):
         """XP should recover from saved progress instead of staying at zero."""
         Achievement.objects.create(
             key='ch1_complete',
@@ -272,7 +298,9 @@ class GameSaveTest(TestCase):
         }, format='json')
         self.assertEqual(resp.status_code, 200)
         self.student.profile.refresh_from_db()
-        self.assertEqual(self.student.profile.total_xp, 50)
+        self.assertEqual(self.student.profile.total_xp, 60)
+        self.assertEqual(resp.json()['total_xp'], 60)
+        self.assertEqual(resp.json()['unlocked_achievements'], ['ch1_complete'])
 
         self.student.profile.total_xp = 0
         self.student.profile.save(update_fields=['total_xp'])
@@ -287,7 +315,7 @@ class GameSaveTest(TestCase):
         }, format='json')
         self.assertEqual(resp.status_code, 200)
         self.student.profile.refresh_from_db()
-        self.assertEqual(self.student.profile.total_xp, 50)
+        self.assertEqual(self.student.profile.total_xp, 60)
 
     def test_reject_skipped_story_milestone(self):
         """A save cannot mark later story milestones done while earlier ones are missing."""

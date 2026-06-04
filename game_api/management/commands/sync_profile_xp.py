@@ -29,7 +29,7 @@ class Command(BaseCommand):
         for user in users:
             save_data = user.game_save.save_data
             newly_unlocked = check_achievements(user, save_data)
-            total_xp = sync_profile_xp(user)
+            total_xp = sync_profile_xp(user, save_data)
             checked += 1
             unlocked_count += len(newly_unlocked)
             self.stdout.write(

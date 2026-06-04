@@ -613,14 +613,23 @@ class GameSaveView(APIView):
             },
         )
 
-        # Auto-check achievements on every save upload
-        from .achievement_engine import check_achievements
+        # Auto-check achievements and XP on every save upload
+        from .achievement_engine import check_achievements, get_unlocked_achievement_keys, sync_profile_xp
         newly_unlocked = check_achievements(request.user, save_data)
+        unlocked_achievements = get_unlocked_achievement_keys(request.user)
+        if save_data.get('unlocked_achievements') != unlocked_achievements:
+            save_data = dict(save_data)
+            save_data['unlocked_achievements'] = unlocked_achievements
+            game_save.save_data = save_data
+            game_save.save(update_fields=['save_data', 'updated_at'])
+        total_xp = sync_profile_xp(request.user, save_data)
 
         return Response({
             'detail': 'Save uploaded successfully.',
             'updated_at': game_save.updated_at.isoformat(),
             'new_achievements': newly_unlocked,
+            'unlocked_achievements': unlocked_achievements,
+            'total_xp': total_xp,
         }, status=status.HTTP_200_OK)
 
 
