@@ -3,7 +3,7 @@ import json
 from django.test import TestCase
 from rest_framework.test import APIClient
 from django.contrib.auth import get_user_model
-from users.models import Profile, Classroom
+from users.models import Achievement, Profile, Classroom
 
 User = get_user_model()
 
@@ -251,6 +251,43 @@ class GameSaveTest(TestCase):
         self.assertAlmostEqual(data['story_progress_percent'], 53.8, places=1)
         self.assertEqual(data['challenges_completed'], 12)
         self.assertEqual(data['learning_modules_completed'], 2)
+
+    def test_save_recalculates_xp_from_earned_achievements(self):
+        """XP should recover from saved progress instead of staying at zero."""
+        Achievement.objects.create(
+            key='ch1_complete',
+            name='Origin Story',
+            description='Completed Chapter 1',
+            xp_reward=50,
+        )
+        self._login()
+        resp = self.client.put(self.url, {
+            'save_data': {
+                'ch1_teaching_done': True,
+                'ch1_quiz_done': True,
+                'ch1_post_quiz_dialogue_done': True,
+                'ch1_convenience_store_cutscene_done': True,
+                'ch1_spaghetti_guy_cutscene_done': True,
+            },
+        }, format='json')
+        self.assertEqual(resp.status_code, 200)
+        self.student.profile.refresh_from_db()
+        self.assertEqual(self.student.profile.total_xp, 50)
+
+        self.student.profile.total_xp = 0
+        self.student.profile.save(update_fields=['total_xp'])
+        resp = self.client.put(self.url, {
+            'save_data': {
+                'ch1_teaching_done': True,
+                'ch1_quiz_done': True,
+                'ch1_post_quiz_dialogue_done': True,
+                'ch1_convenience_store_cutscene_done': True,
+                'ch1_spaghetti_guy_cutscene_done': True,
+            },
+        }, format='json')
+        self.assertEqual(resp.status_code, 200)
+        self.student.profile.refresh_from_db()
+        self.assertEqual(self.student.profile.total_xp, 50)
 
     def test_reject_skipped_story_milestone(self):
         """A save cannot mark later story milestones done while earlier ones are missing."""

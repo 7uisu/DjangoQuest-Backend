@@ -137,13 +137,26 @@ def check_achievements(user, save_data: dict) -> list[str]:
                     user=user,
                     achievement=achievement,
                 )
-                # Award XP
-                if hasattr(user, 'profile'):
-                    user.profile.total_xp += achievement.xp_reward
-                    user.profile.save(update_fields=['total_xp'])
-
                 newly_unlocked.append(key)
         except Exception:
             continue  # Don't crash save on bad achievement data
 
+    sync_profile_xp(user)
     return newly_unlocked
+
+
+def sync_profile_xp(user) -> int:
+    """Keep profile XP equal to the user's earned achievement rewards."""
+    if not hasattr(user, 'profile'):
+        return 0
+
+    total = sum(
+        UserAchievement.objects
+        .filter(user=user)
+        .select_related('achievement')
+        .values_list('achievement__xp_reward', flat=True)
+    )
+    if user.profile.total_xp != total:
+        user.profile.total_xp = total
+        user.profile.save(update_fields=['total_xp'])
+    return total

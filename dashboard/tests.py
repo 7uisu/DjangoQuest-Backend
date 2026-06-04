@@ -2,6 +2,8 @@
 from django.test import TestCase, Client
 from django.urls import reverse
 from django.contrib.auth import get_user_model
+from rest_framework.test import APIClient
+from game_api.models import GameSave
 from users.models import EducatorAccessCode, Classroom, Profile
 
 User = get_user_model()
@@ -189,6 +191,49 @@ class ClassroomTest(TestCase):
         Classroom.objects.create(teacher=self.teacher, name='B')
         codes = list(Classroom.objects.values_list('enrollment_code', flat=True))
         self.assertEqual(len(codes), len(set(codes)))
+
+
+class LeaderboardApiTest(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.teacher = User.objects.create_user(
+            email='teacher@test.com', username='teacher', password='TestPass123!'
+        )
+        self.teacher.is_teacher = True
+        self.teacher.is_student = False
+        self.teacher.save()
+        Profile.objects.create(user=self.teacher)
+        self.classroom = Classroom.objects.create(teacher=self.teacher, name='CS101')
+
+    def _student_with_score(self, username, xp, progress, achievements_count=0):
+        user = User.objects.create_user(
+            email=f'{username}@test.com', username=username, password='TestPass123!'
+        )
+        user.is_student = True
+        user.save()
+        profile = Profile.objects.create(user=user, total_xp=xp, classroom=self.classroom)
+        profile.classrooms.add(self.classroom)
+        GameSave.objects.create(
+            user=user,
+            save_data={},
+            story_progress_percent=progress,
+        )
+        user.achievements_count = achievements_count
+        return user
+
+    def test_equal_scores_share_rank(self):
+        first = self._student_with_score('first', 100, 100.0)
+        second = self._student_with_score('second', 100, 100.0)
+        third = self._student_with_score('third', 50, 80.0)
+
+        self.client.force_authenticate(user=first)
+        resp = self.client.get('/api/dashboard/leaderboard/?scope=classroom')
+
+        self.assertEqual(resp.status_code, 200)
+        ranks = {entry['username']: entry['rank'] for entry in resp.json()['entries']}
+        self.assertEqual(ranks[first.username], 1)
+        self.assertEqual(ranks[second.username], 1)
+        self.assertEqual(ranks[third.username], 3)
 
 
 class ResetPasswordTest(TestCase):

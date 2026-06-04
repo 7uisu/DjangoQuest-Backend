@@ -64,9 +64,19 @@ class LeaderboardView(APIView):
         )[:50]
 
         entries = []
-        for rank, user in enumerate(qs, start=1):
+        last_score = None
+        current_rank = 0
+        for index, user in enumerate(qs, start=1):
+            score = (
+                user.game_save.story_progress_percent,
+                user.profile.total_xp,
+                user.achievements_count,
+            )
+            if score != last_score:
+                current_rank = index
+                last_score = score
             entries.append({
-                'rank': rank,
+                'rank': current_rank,
                 'username': user.username,
                 'total_xp': user.profile.total_xp,
                 'story_progress': user.game_save.story_progress_percent,
