@@ -784,12 +784,8 @@ class GameCheckCodeView(APIView):
                         tab_answers = [tab_answers]
                     for ans in tab_answers:
                         ans_str = str(ans).strip()
-                        if student_content == ans_str or ans_str in student_content:
-                            tab_pass = True
-                            break
-                        norm_student = re.sub(r'\s+', ' ', student_content)
-                        norm_ans = re.sub(r'\s+', ' ', ans_str)
-                        if norm_student == norm_ans or norm_ans in norm_student:
+                        file_language = self._language_from_filename(tab_name, language)
+                        if self._matches_expected_text(student_content, ans_str, file_language):
                             tab_pass = True
                             break
                     if not tab_pass:
@@ -814,11 +810,8 @@ class GameCheckCodeView(APIView):
                     for tab_name, expected_content in ans_dict.items():
                         student_content = str(code.get(tab_name, "")).strip()
                         expected_content_str = str(expected_content).strip()
-                        if student_content == expected_content_str or expected_content_str in student_content:
-                            continue
-                        norm_student = re.sub(r'\s+', ' ', student_content)
-                        norm_expected = re.sub(r'\s+', ' ', expected_content_str)
-                        if norm_student == norm_expected or norm_expected in norm_student:
+                        file_language = self._language_from_filename(tab_name, language)
+                        if self._matches_expected_text(student_content, expected_content_str, file_language):
                             continue
                         all_tabs_correct = False
                         break
@@ -828,13 +821,7 @@ class GameCheckCodeView(APIView):
                 code_stripped = code.strip() if isinstance(code, str) else str(code).strip()
                 for answer in expected_answers:
                     ans = answer.strip() if isinstance(answer, str) else str(answer).strip()
-                    if code_stripped == ans:
-                        return True, "Correct!"
-                    if ans in (code if isinstance(code, str) else code_stripped):
-                        return True, "Correct!"
-                    norm_code = re.sub(r'\s+', ' ', code_stripped)
-                    norm_ans = re.sub(r'\s+', ' ', ans)
-                    if norm_code == norm_ans or norm_ans in norm_code:
+                    if self._matches_expected_text(code_stripped, ans, language):
                         return True, "Correct!"
 
         # Only check Python syntax if the answer didn't match
@@ -855,6 +842,42 @@ class GameCheckCodeView(APIView):
                     return False, f"SyntaxError on line {e.lineno}: {e.msg}"
 
         return False, "❌ Not quite right. Check your code and try again."
+
+    def _matches_expected_text(self, student_text, expected_text, language='python'):
+        student = str(student_text or '').strip()
+        expected = str(expected_text or '').strip()
+        if not student or not expected:
+            return False
+
+        if student == expected or expected in student:
+            return True
+
+        norm_student = re.sub(r'\s+', ' ', student).strip()
+        norm_expected = re.sub(r'\s+', ' ', expected).strip()
+        if norm_student == norm_expected or norm_expected in norm_student:
+            return True
+
+        semantic_student = self._normalize_expected_semantics(student, language)
+        semantic_expected = self._normalize_expected_semantics(expected, language)
+        return semantic_student == semantic_expected or semantic_expected in semantic_student
+
+    def _normalize_expected_semantics(self, text, language='python'):
+        normalized = re.sub(r'\s+', ' ', str(text or '')).strip()
+        if language == 'html':
+            return re.sub(r'>\s+<', '><', normalized)
+        if language == 'css':
+            return re.sub(r'\s*([:;{}(),])\s*', r'\1', normalized)
+        return normalized
+
+    def _language_from_filename(self, filename, fallback='python'):
+        filename = str(filename or '').lower()
+        if filename.endswith('.html'):
+            return 'html'
+        if filename.endswith('.css'):
+            return 'css'
+        if filename.endswith('.py'):
+            return 'python'
+        return fallback
 
     def _execute_judge0(self, code, language):
         """
