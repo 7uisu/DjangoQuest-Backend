@@ -691,6 +691,8 @@ class GameCheckCodeView(APIView):
         challenge_id = request.data.get('challenge_id', '')
         expected_answers = request.data.get('expected_answers', [])
         expected_output = request.data.get('expected_output', '')
+        hint_context = request.data.get('hint_context', '')
+        hint_mode = bool(request.data.get('hint_mode', False))
         print(f"[check-code] code='{str(code)[:50]}...', language={language}, challenge_id={challenge_id}")
 
         if not code:
@@ -704,10 +706,18 @@ class GameCheckCodeView(APIView):
             code, language, expected_answers
         )
 
-        if is_correct:
+        if is_correct and not hint_mode:
             return Response({
                 'success': True,
                 'output': expected_output or '✅ Correct! Great job!',
+            })
+
+        if is_correct and hint_mode:
+            return Response({
+                'success': True,
+                'output': expected_output or '✅ Correct! Great job!',
+                'ai_hint': 'Your current answer already matches the expected pattern. Try running it, then check the terminal output.',
+                'ai_hint_source': 'local',
             })
 
         # ── Tier 2: Judge0 Removed for Godot Game ──
@@ -715,15 +725,17 @@ class GameCheckCodeView(APIView):
 
         # ── Tier 3: Gemini AI hint (if API key is set) ──
         ai_hint = None
+        ai_hint_source = 'local'
         if GEMINI_API_KEY or GROQ_API_KEY:
             print(f"[check-code] Starting Gemini hint generation...")
-            ai_hint = self._generate_gemini_hint(
+            ai_hint, ai_hint_source = self._generate_gemini_hint(
                 code, language, expected_answers, 
-                local_message, judge0_output
+                local_message, judge0_output, hint_context
             )
             print(f"[check-code] Gemini done: {str(ai_hint)[:80]}")
         if not ai_hint:
-            ai_hint = self._fallback_code_hint(code, expected_answers, local_message)
+            ai_hint = self._fallback_code_hint(code, expected_answers, local_message, hint_context)
+            ai_hint_source = 'local'
 
         # Build the response
         output = local_message
@@ -737,6 +749,7 @@ class GameCheckCodeView(APIView):
             'output': output,
             'ai_hint': ai_hint or '',
             'judge0_output': judge0_output or '',
+            'ai_hint_source': ai_hint_source,
         })
 
     def _local_validate(self, code, language, expected_answers):
@@ -901,13 +914,13 @@ class GameCheckCodeView(APIView):
             return f"Judge0 unavailable: {str(e)}"
 
     def _generate_gemini_hint(self, code, language, expected_answers, 
-                               local_error, judge0_output):
+                               local_error, judge0_output, hint_context=''):
         """
         Tier 3: Ask Gemini AI to generate a helpful, friendly hint.
         Only called when Tier 1 fails, keeping API usage minimal.
         """
         if not GEMINI_API_KEY and not GROQ_API_KEY:
-            return self._fallback_code_hint(code, expected_answers, local_error)
+            return self._fallback_code_hint(code, expected_answers, local_error, hint_context), 'local'
 
         try:
             is_dict_code = isinstance(code, dict)
@@ -920,9 +933,8 @@ class GameCheckCodeView(APIView):
                 formatted_student_code = f'"{code}"'
                 multi_tab_instruction = ""
 
-            # Build a diff-style comparison for the AI
-            closest_answer = expected_answers[0] if expected_answers else ""
-            
+            expected_preview = self._preview_expected_answers(expected_answers)
+
             prompt = f"""You are a sharp-eyed coding tutor in a game called DjangoQuest.
 Your job is to compare the student's code to the correct answer and find the EXACT mistake.
 
@@ -930,7 +942,10 @@ STUDENT WROTE:
 {formatted_student_code}
 
 CORRECT ANSWER (one of these):
-{json.dumps(expected_answers[:3])}
+{json.dumps(expected_preview)}
+
+ADDITIONAL PROJECT CONTEXT:
+{hint_context if hint_context else "No extra context provided."}
 
 RULES:
 1. Compare the student's text against each correct answer CHARACTER BY CHARACTER.
@@ -954,14 +969,14 @@ IMPORTANT CRITERIA:
 
 Your conversational hint:"""
 
-            steps_to_try = GEMINI_MODELS + (['groq'] if GROQ_API_KEY else [])
+            steps_to_try = (GEMINI_MODELS if GEMINI_API_KEY else []) + (['groq'] if GROQ_API_KEY else [])
             
             for step in steps_to_try:
                 if step == 'groq':
                     print("[Gemini] Trying Groq fallback...")
                     groq_result = _call_groq(prompt, max_tokens=500, temperature=0.7)
                     if groq_result:
-                        return groq_result
+                        return groq_result, 'groq'
                     continue
 
                 model_name = step
@@ -990,39 +1005,112 @@ Your conversational hint:"""
                         if parts:
                             hint = parts[0].get('text', '').strip()
                             print(f"[Gemini] ✅ Generated hint using {model_name}: {hint[:80]}...")
-                            return hint
+                            return hint, f'gemini:{model_name}'
                 else:
                     print(f"[Gemini] ⚠️ API returned {resp.status_code} for {model_name}: {resp.text[:200]}")
                     print(f"[Gemini] Falling back to next model if available...")
 
-            return self._fallback_code_hint(code, expected_answers, local_error)
+            return self._fallback_code_hint(code, expected_answers, local_error, hint_context), 'local'
 
         except Exception as e:
             print(f"[Gemini] ❌ Exception: {e}")
-            return self._fallback_code_hint(code, expected_answers, local_error)
+            return self._fallback_code_hint(code, expected_answers, local_error, hint_context), 'local'
 
-    def _fallback_code_hint(self, code, expected_answers, local_error):
+    def _preview_expected_answers(self, expected_answers):
+        if isinstance(expected_answers, dict):
+            return {key: value for key, value in list(expected_answers.items())[:3]}
+        if isinstance(expected_answers, list):
+            return expected_answers[:3]
+        return [expected_answers]
+
+    def _fallback_code_hint(self, code, expected_answers, local_error, hint_context=''):
         """Small local hint so the game still helps when AI providers are down."""
-        if local_error and 'SyntaxError' in str(local_error):
-            return str(local_error)
         if not expected_answers:
+            if local_error and 'SyntaxError' in str(local_error):
+                return str(local_error)
             return "Check the task instructions and compare your spelling, symbols, and spacing carefully."
 
-        student = json.dumps(code, sort_keys=True) if isinstance(code, dict) else str(code)
-        answer = expected_answers
-        if isinstance(expected_answers, dict):
-            first_key = next(iter(expected_answers), None)
-            answer = expected_answers.get(first_key, "")
-            if isinstance(answer, list):
-                answer = answer[0] if answer else ""
-        elif isinstance(expected_answers, list):
-            answer = expected_answers[0] if expected_answers else ""
+        student = self._extract_hint_student_text(code)
+        answer = self._pick_expected_answer(expected_answers, hint_context, student)
+        if not answer:
+            return "Check the task instructions and compare your spelling, symbols, and spacing carefully."
         answer = str(answer)
 
-        if len(student.strip()) < len(answer.strip()):
-            return "Your answer looks shorter than expected. Check for a missing word, tag, symbol, quote, or closing parenthesis."
-        if len(student.strip()) > len(answer.strip()):
-            return "Your answer has extra text compared with the expected pattern. Remove anything that is not part of the required code."
+        norm_student = re.sub(r'\s+', ' ', student.strip())
+        norm_answer = re.sub(r'\s+', ' ', answer.strip())
+        if norm_answer and norm_answer in norm_student:
+            return "Your typed answer already contains the expected pattern. If it still fails, remove surrounding notes or comments and keep only the required code."
+
+        return self._build_local_diff_hint(student, answer)
+
+    def _extract_hint_student_text(self, code):
+        if isinstance(code, dict):
+            return json.dumps(code, indent=2, sort_keys=True)
+        text = str(code)
+        marker = "### USER_ACTIVE_SNIPPET"
+        if marker in text:
+            return text.split(marker, 1)[1].strip()
+        return text.strip()
+
+    def _pick_expected_answer(self, expected_answers, hint_context='', student=''):
+        active_file = ''
+        if hint_context:
+            match = re.search(r'### ACTIVE_FILE:\s*(.+)', str(hint_context))
+            if match:
+                active_file = match.group(1).strip()
+
+        if isinstance(expected_answers, dict):
+            if active_file and active_file in expected_answers:
+                answer = expected_answers.get(active_file, "")
+            else:
+                first_key = next(iter(expected_answers), None)
+                answer = expected_answers.get(first_key, "") if first_key else ""
+            return answer[0] if isinstance(answer, list) and answer else answer
+
+        candidates = []
+        if isinstance(expected_answers, list):
+            for answer in expected_answers:
+                if isinstance(answer, dict):
+                    if active_file and active_file in answer:
+                        value = answer.get(active_file, "")
+                        candidates.append(value[0] if isinstance(value, list) and value else value)
+                    else:
+                        candidates.extend(str(v) for v in answer.values())
+                else:
+                    candidates.append(answer)
+        else:
+            candidates = [expected_answers]
+
+        candidates = [str(candidate) for candidate in candidates if str(candidate).strip()]
+        if not candidates:
+            return ""
+
+        from difflib import SequenceMatcher
+        return max(candidates, key=lambda candidate: SequenceMatcher(None, student, candidate).ratio())
+
+    def _build_local_diff_hint(self, student, answer):
+        from difflib import SequenceMatcher
+
+        student_clean = student.strip()
+        answer_clean = answer.strip()
+        matcher = SequenceMatcher(None, student_clean, answer_clean)
+
+        for tag, i1, i2, j1, j2 in matcher.get_opcodes():
+            if tag == 'equal':
+                continue
+            student_piece = student_clean[i1:i2]
+            answer_piece = answer_clean[j1:j2]
+            before = answer_clean[max(0, j1 - 12):j1]
+            after = answer_clean[j2:j2 + 12]
+            location = f"near `{before}{answer_piece}{after}`".replace("\n", "\\n")
+
+            if tag == 'insert':
+                return f"You are missing `{answer_piece}` {location}. Add that exact text in the matching spot."
+            if tag == 'delete':
+                return f"`{student_piece}` looks extra compared with the expected pattern. Remove that part and keep the surrounding code tight."
+            if tag == 'replace':
+                return f"You wrote `{student_piece}`, but this spot should be `{answer_piece}` {location}."
+
         return "You are close. Compare capitalization, spelling, punctuation, quotes, and spacing with the task pattern."
 
 
