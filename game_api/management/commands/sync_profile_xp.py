@@ -12,10 +12,9 @@ class Command(BaseCommand):
         if not Achievement.objects.exists():
             self.stdout.write(
                 self.style.WARNING(
-                    "No achievements found. Run seed_achievements before syncing XP."
+                    "No achievements found. Syncing base progress XP only."
                 )
             )
-            return
 
         User = get_user_model()
         users = (
