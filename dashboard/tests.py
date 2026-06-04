@@ -235,6 +235,18 @@ class LeaderboardApiTest(TestCase):
         self.assertEqual(ranks[second.username], 1)
         self.assertEqual(ranks[third.username], 3)
 
+    def test_xp_ranks_before_story_progress(self):
+        high_xp = self._student_with_score('highxp', 120, 50.0)
+        high_progress = self._student_with_score('highprogress', 80, 100.0)
+
+        self.client.force_authenticate(user=high_xp)
+        resp = self.client.get('/api/dashboard/leaderboard/?scope=classroom')
+
+        self.assertEqual(resp.status_code, 200)
+        entries = resp.json()['entries']
+        self.assertEqual(entries[0]['username'], high_xp.username)
+        self.assertEqual(entries[1]['username'], high_progress.username)
+
 
 class ResetPasswordTest(TestCase):
     def setUp(self):
