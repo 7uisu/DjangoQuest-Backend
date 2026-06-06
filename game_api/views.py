@@ -1374,7 +1374,7 @@ class GameAIEvaluatorView(APIView):
         prompt = self._build_prompt(challenge_type, student_answer, context)
 
         try:
-            steps_to_try = GEMINI_MODELS + (['groq'] if GROQ_API_KEY else [])
+            steps_to_try = (GEMINI_MODELS if GEMINI_API_KEY else []) + (['groq'] if GROQ_API_KEY else [])
             for step in steps_to_try:
                 if step == 'groq':
                     print("[AI Evaluator] Trying Groq fallback...")
@@ -1386,10 +1386,7 @@ class GameAIEvaluatorView(APIView):
                         elif re.match(r'^❌ Incorrect', groq_result):
                             return Response({'success': False, 'feedback': groq_result})
                         else:
-                            return Response({
-                                'success': False,
-                                'feedback': f'❌ System Error: AI provided an invalid or manipulated response format. Please try again. Raw: {groq_result[:50]}...'
-                            })
+                            print(f"[AI Evaluator] Groq returned invalid format, using backup evaluator: {groq_result[:80]}")
                     continue
 
                 model_name = step
@@ -1424,10 +1421,8 @@ class GameAIEvaluatorView(APIView):
                             elif feedback.startswith("System Error") or feedback.startswith("❌ Incorrect"):
                                 success = False
                             else:
-                                return Response({
-                                    'success': False,
-                                    'feedback': f'❌ System Error: AI provided an invalid or manipulated response format. Please try again. Raw: {feedback[:50]}...'
-                                })
+                                print(f"[AI Evaluator] Gemini returned invalid format, using backup evaluator: {feedback[:80]}")
+                                continue
 
                             return Response({
                                 'success': success,
@@ -1455,9 +1450,9 @@ class GameAIEvaluatorView(APIView):
             'url_routing': ['/', '-'],
             'auth_checker': ['valid', 'invalid'],
             'http_verbs': ['get', 'post', 'put', 'delete'],
-            'query_ai_evaluator_1': ['one-to-one'],
-            'query_ai_evaluator_2': ['one-to-many'],
-            'query_ai_evaluator_3': ['many-to-many'],
+            'query_ai_evaluator_1': [],
+            'query_ai_evaluator_2': [],
+            'query_ai_evaluator_3': [],
         }
         aliases = {
             'syntax_ai_data_types': 'data_types',
@@ -1475,9 +1470,9 @@ class GameAIEvaluatorView(APIView):
                 missing.append('four URL paths')
         elif key.startswith('query_ai_evaluator'):
             relationship_terms = {
-                'query_ai_evaluator_1': ['one-to-one', '1:1'],
-                'query_ai_evaluator_2': ['one-to-many', '1:n', 'one to many'],
-                'query_ai_evaluator_3': ['many-to-many', 'm:n', 'many to many'],
+                'query_ai_evaluator_1': ['one-to-one', 'one to one', 'onetoone', '1:1'],
+                'query_ai_evaluator_2': ['one-to-many', 'one to many', 'onetomany', '1:n', '1:m'],
+                'query_ai_evaluator_3': ['many-to-many', 'many to many', 'manytomany', 'm:n', 'm:m'],
             }.get(key, [])
             if not any(term in lower for term in relationship_terms):
                 missing.append('relationship type')
