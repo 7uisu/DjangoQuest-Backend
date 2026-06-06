@@ -1390,11 +1390,10 @@ class GameAIEvaluatorView(APIView):
                     print("[AI Evaluator] Trying Groq fallback...")
                     groq_result = _call_groq(prompt, max_tokens=400, temperature=0.3)
                     if groq_result:
-                        import re
-                        if re.match(r'^✅ Correct', groq_result):
-                            return Response({'success': True, 'feedback': groq_result, 'ai_source': 'groq'})
-                        elif re.match(r'^❌ Incorrect', groq_result):
-                            return Response({'success': False, 'feedback': groq_result, 'ai_source': 'groq'})
+                        parsed = self._parse_ai_evaluator_feedback(groq_result)
+                        if parsed:
+                            success, feedback = parsed
+                            return Response({'success': success, 'feedback': feedback, 'ai_source': 'groq'})
                         else:
                             print(f"[AI Evaluator] Groq returned invalid format, using backup evaluator: {groq_result[:80]}")
                     continue
@@ -1423,16 +1422,11 @@ class GameAIEvaluatorView(APIView):
                         parts = candidates[0].get('content', {}).get('parts', [])
                         if parts:
                             feedback = parts[0].get('text', '').strip()
-                            import re
-                            if re.match(r'^✅ Correct', feedback):
-                                success = True
-                            elif re.match(r'^❌ Incorrect', feedback):
-                                success = False
-                            elif feedback.startswith("System Error") or feedback.startswith("❌ Incorrect"):
-                                success = False
-                            else:
+                            parsed = self._parse_ai_evaluator_feedback(feedback)
+                            if not parsed:
                                 print(f"[AI Evaluator] Gemini returned invalid format, using backup evaluator: {feedback[:80]}")
                                 continue
+                            success, feedback = parsed
 
                             return Response({
                                 'success': success,
@@ -1451,6 +1445,33 @@ class GameAIEvaluatorView(APIView):
             return Response(data)
 
     # ── Prompt builder: routes by challenge_type ──────────────────────────
+
+    def _parse_ai_evaluator_feedback(self, raw_feedback):
+        """Accept normal LLM formatting while preserving explicit correct/incorrect verdicts."""
+        feedback = str(raw_feedback or '').strip()
+        if not feedback:
+            return None
+
+        feedback = re.sub(r'^```(?:\w+)?\s*', '', feedback).strip()
+        feedback = re.sub(r'\s*```$', '', feedback).strip()
+        feedback = feedback.strip(' "\'')
+        feedback = re.sub(r'^(?:your response|response|feedback)\s*:\s*', '', feedback, flags=re.IGNORECASE).strip()
+        verdict_text = re.sub(r'[*_`#>~]', '', feedback).strip()
+
+        if re.match(r'^(✅\s*)?correct\b', verdict_text, flags=re.IGNORECASE) or verdict_text.startswith('✅'):
+            if not feedback.startswith('✅'):
+                feedback = '✅ ' + feedback
+            return True, feedback
+
+        if re.match(r'^(❌\s*)?incorrect\b', verdict_text, flags=re.IGNORECASE) or verdict_text.startswith('❌'):
+            if not feedback.startswith('❌'):
+                feedback = '❌ ' + feedback
+            return False, feedback
+
+        if verdict_text.lower().startswith('system error'):
+            return False, '❌ Incorrect. The evaluator rejected this response format. Please answer the challenge directly.'
+
+        return None
 
     def _fallback_ai_evaluate(self, challenge_type, student_answer, context='', reason='AI provider unavailable.'):
         """Deterministic backup so AI minigames remain playable during provider outages."""
