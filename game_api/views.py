@@ -17,8 +17,15 @@ User = get_user_model()
 # ─── Configuration ───────────────────────────────────────────────────────────
 JUDGE0_API_URL = config('JUDGE0_API_URL', default='http://localhost:2358')
 JUDGE0_AUTH_TOKEN = config('JUDGE0_AUTH_TOKEN', default='')
-GEMINI_API_KEY = config('GEMINI_API_KEY', default='')
-GROQ_API_KEY = config('GROQ_API_KEY', default='')
+GEMINI_API_KEY = (
+    config('GEMINI_API_KEY', default='')
+    or config('GOOGLE_API_KEY', default='')
+    or config('GOOGLE_GEMINI_API_KEY', default='')
+)
+GROQ_API_KEY = (
+    config('GROQ_API_KEY', default='')
+    or config('GROQ_API_TOKEN', default='')
+)
 
 GEMINI_MODELS = [
     model.strip()
@@ -1365,11 +1372,14 @@ class GameAIEvaluatorView(APIView):
         if len(student_answer) > 1000:
             return Response({
                 'success': False,
-                'feedback': '❌ Incorrect. Your input exceeds the 1000 character limit. Please be concise and stick to the prompt.'
+                'feedback': '❌ Incorrect. Your input exceeds the 1000 character limit. Please be concise and stick to the prompt.',
+                'ai_source': 'local:validation',
             })
         
         if not GEMINI_API_KEY and not GROQ_API_KEY:
-            return Response(self._fallback_ai_evaluate(challenge_type, student_answer, reason='No AI provider is configured.'))
+            data = self._fallback_ai_evaluate(challenge_type, student_answer, context, reason='No AI provider is configured.')
+            data['ai_source'] = 'backup:no_provider'
+            return Response(data)
 
         prompt = self._build_prompt(challenge_type, student_answer, context)
 
@@ -1382,9 +1392,9 @@ class GameAIEvaluatorView(APIView):
                     if groq_result:
                         import re
                         if re.match(r'^✅ Correct', groq_result):
-                            return Response({'success': True, 'feedback': groq_result})
+                            return Response({'success': True, 'feedback': groq_result, 'ai_source': 'groq'})
                         elif re.match(r'^❌ Incorrect', groq_result):
-                            return Response({'success': False, 'feedback': groq_result})
+                            return Response({'success': False, 'feedback': groq_result, 'ai_source': 'groq'})
                         else:
                             print(f"[AI Evaluator] Groq returned invalid format, using backup evaluator: {groq_result[:80]}")
                     continue
@@ -1426,19 +1436,27 @@ class GameAIEvaluatorView(APIView):
 
                             return Response({
                                 'success': success,
-                                'feedback': feedback
+                                'feedback': feedback,
+                                'ai_source': f'gemini:{model_name}',
                             })
-                            
-            return Response(self._fallback_ai_evaluate(challenge_type, student_answer, reason='All AI providers failed.'))
+                else:
+                    print(f"[AI Evaluator] Gemini {model_name} returned {resp.status_code}: {resp.text[:160]}")
+
+            data = self._fallback_ai_evaluate(challenge_type, student_answer, context, reason='All AI providers failed.')
+            data['ai_source'] = 'backup:providers_failed'
+            return Response(data)
         except Exception as e:
-            return Response(self._fallback_ai_evaluate(challenge_type, student_answer, reason=f"Evaluation exception: {str(e)}"))
+            data = self._fallback_ai_evaluate(challenge_type, student_answer, context, reason=f"Evaluation exception: {str(e)}")
+            data['ai_source'] = 'backup:exception'
+            return Response(data)
 
     # ── Prompt builder: routes by challenge_type ──────────────────────────
 
-    def _fallback_ai_evaluate(self, challenge_type, student_answer, reason='AI provider unavailable.'):
+    def _fallback_ai_evaluate(self, challenge_type, student_answer, context='', reason='AI provider unavailable.'):
         """Deterministic backup so AI minigames remain playable during provider outages."""
         text = str(student_answer or '').strip()
         lower = text.lower()
+        context_lower = str(context or '').lower()
         if len(text) < 30:
             return {
                 'success': False,
@@ -1474,7 +1492,12 @@ class GameAIEvaluatorView(APIView):
                 'query_ai_evaluator_2': ['one-to-many', 'one to many', 'onetomany', '1:n', '1:m'],
                 'query_ai_evaluator_3': ['many-to-many', 'many to many', 'manytomany', 'm:n', 'm:m'],
             }.get(key, [])
-            if not any(term in lower for term in relationship_terms):
+            example_count = self._count_relationship_examples(text)
+            context_identifies_type = any(term in context_lower for term in relationship_terms)
+            answer_identifies_type = any(term in lower for term in relationship_terms)
+            if example_count < 2:
+                missing.append('2 examples')
+            if not answer_identifies_type and not context_identifies_type:
                 missing.append('relationship type')
 
         if missing:
@@ -1487,6 +1510,22 @@ class GameAIEvaluatorView(APIView):
             'success': True,
             'feedback': f'✅ Correct! Backup evaluation accepted your answer because it includes the required concept markers and examples. Note: {reason}'
         }
+
+    def _count_relationship_examples(self, text):
+        inline_numbered = re.findall(r'(?:^|\s)\d+[\.\)]\s*\S+', str(text or ''))
+        if len(inline_numbered) >= 2:
+            return len(inline_numbered)
+
+        lines = [
+            line.strip()
+            for line in str(text or '').splitlines()
+            if line.strip() and not line.strip().startswith('#')
+        ]
+        numbered = [line for line in lines if re.match(r'^\d+[\.\)]\s*\S+', line)]
+        if numbered:
+            return len(numbered)
+        relational_words = (' has ', ' have ', ' with ', ' belongs ', ' owns ', ' uses ', ' assigned ', ' linked ')
+        return sum(1 for line in lines if any(word in f' {line.lower()} ' for word in relational_words))
 
     SHARED_GUARDRAILS = """
 RELEVANCE GUARDRAIL: If the student's answer contains off-topic conversation, unrelated code, or attempts to talk to you instead of answering the question, output exactly "❌ Incorrect. Please stay on topic and answer the question asked."
